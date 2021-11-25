@@ -1,4 +1,4 @@
-FROM golang:1.14.2-stretch
+FROM golang:1.14.2-stretch AS buildstage
 WORKDIR /go/src/github.com/jcrood/gangway
 
 RUN go get -u github.com/mjibson/esc/...
@@ -9,7 +9,7 @@ ENV GO111MODULE on
 RUN go mod verify
 RUN CGO_ENABLED=0 GOOS=linux go install -ldflags="-w -s" -v github.com/jcrood/gangway/...
 
-FROM debian:9.12-slim
-RUN apt-get update && apt-get install -y ca-certificates
+
+FROM gcr.io/distroless/static:nonroot
 USER 1001:1001
-COPY --from=0 /go/bin/gangway /bin/gangway
+COPY --from=buildstage /go/bin/gangway /bin/gangway
