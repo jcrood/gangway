@@ -25,9 +25,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/heptiolabs/gangway/internal/config"
-	"github.com/heptiolabs/gangway/internal/oidc"
-	"github.com/heptiolabs/gangway/internal/session"
+	"github.com/jcrood/gangway/internal/config"
+	"github.com/jcrood/gangway/internal/oidc"
+	"github.com/jcrood/gangway/internal/session"
 	"github.com/justinas/alice"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"

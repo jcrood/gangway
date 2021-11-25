@@ -28,7 +28,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/ghodss/yaml"
-	"github.com/heptiolabs/gangway/internal/oidc"
+	"github.com/jcrood/gangway/internal/oidc"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api/v1"

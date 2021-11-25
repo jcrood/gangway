@@ -29,8 +29,8 @@ import (
 	"github.com/ghodss/yaml"
 
 	"github.com/gorilla/sessions"
-	"github.com/heptiolabs/gangway/internal/config"
-	"github.com/heptiolabs/gangway/internal/session"
+	"github.com/jcrood/gangway/internal/config"
+	"github.com/jcrood/gangway/internal/session"
 	"golang.org/x/oauth2"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api/v1"
 )

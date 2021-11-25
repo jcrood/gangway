@@ -1,4 +1,4 @@
-module github.com/heptiolabs/gangway
+module github.com/jcrood/gangway
 
 go 1.12
 
