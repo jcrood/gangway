@@ -52,7 +52,7 @@ func rootPathHandler(fn http.HandlerFunc) http.HandlerFunc {
 		// The "/" pattern matches everything, so we need to check
 		// that we're at the root here.
 		if cfg.HTTPPath == "" && r.URL.Path != "/" {
-			http.Redirect(w, r, cfg.GetRootPathPrefix(), http.StatusMovedPermanently)
+			http.NotFound(w, r)
 			return
 		}
 		fn(w, r)
