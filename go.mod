@@ -3,7 +3,6 @@ module github.com/jcrood/gangway
 go 1.18
 
 require (
-	github.com/ghodss/yaml v1.0.0
 	github.com/golang-jwt/jwt/v4 v4.4.1
 	github.com/gorilla/securecookie v0.0.0-20160422134519-667fe4e3466a
 	github.com/gorilla/sessions v0.0.0-20160922145804-ca9ada445741
@@ -14,6 +13,7 @@ require (
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/client-go v0.24.1
+	sigs.k8s.io/yaml v1.3.0
 )
 
 require (

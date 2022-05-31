@@ -26,7 +26,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ghodss/yaml"
+	"sigs.k8s.io/yaml"
 
 	"github.com/gorilla/sessions"
 	"github.com/jcrood/gangway/internal/config"
