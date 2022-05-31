@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/golang-jwt/jwt/v4 v4.4.1
-	github.com/gorilla/securecookie v0.0.0-20160422134519-667fe4e3466a
+	github.com/gorilla/securecookie v1.1.1
 	github.com/gorilla/sessions v0.0.0-20160922145804-ca9ada445741
 	github.com/justinas/alice v0.0.0-20171023064455-03f45bd4b7da
 	github.com/kelseyhightower/envconfig v1.3.0
