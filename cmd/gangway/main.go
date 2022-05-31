@@ -28,7 +28,6 @@ import (
 	"github.com/jcrood/gangway/internal/config"
 	"github.com/jcrood/gangway/internal/oidc"
 	"github.com/jcrood/gangway/internal/session"
-	"github.com/justinas/alice"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 )
@@ -88,16 +87,14 @@ func main() {
 	transportConfig = config.NewTransportConfig(cfg.TrustedCAPath)
 	gangwayUserSession = session.New(cfg.SessionSecurityKey)
 
-	loginRequiredHandlers := alice.New(loginRequired)
-
 	http.HandleFunc(cfg.GetRootPathPrefix(), httpLogger(rootPathHandler(homeHandler)))
 	http.HandleFunc(fmt.Sprintf("%s/login", cfg.HTTPPath), httpLogger(loginHandler))
 	http.HandleFunc(fmt.Sprintf("%s/callback", cfg.HTTPPath), httpLogger(callbackHandler))
 
 	// middleware'd routes
-	http.Handle(fmt.Sprintf("%s/logout", cfg.HTTPPath), loginRequiredHandlers.ThenFunc(logoutHandler))
-	http.Handle(fmt.Sprintf("%s/commandline", cfg.HTTPPath), loginRequiredHandlers.ThenFunc(commandlineHandler))
-	http.Handle(fmt.Sprintf("%s/kubeconf", cfg.HTTPPath), loginRequiredHandlers.ThenFunc(kubeConfigHandler))
+	http.Handle(fmt.Sprintf("%s/logout", cfg.HTTPPath), loginRequired(http.HandlerFunc(logoutHandler)))
+	http.Handle(fmt.Sprintf("%s/commandline", cfg.HTTPPath), loginRequired(http.HandlerFunc(commandlineHandler)))
+	http.Handle(fmt.Sprintf("%s/kubeconf", cfg.HTTPPath), loginRequired(http.HandlerFunc(kubeConfigHandler)))
 
 	bindAddr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	// create http server with timeouts

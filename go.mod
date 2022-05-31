@@ -6,7 +6,6 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.4.1
 	github.com/gorilla/securecookie v1.1.1
 	github.com/gorilla/sessions v1.2.1
-	github.com/justinas/alice v0.0.0-20171023064455-03f45bd4b7da
 	github.com/kelseyhightower/envconfig v1.3.0
 	github.com/sirupsen/logrus v1.0.3
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292
