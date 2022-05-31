@@ -93,3 +93,7 @@ data:
     # The path to find custom HTML templates
     # Env var: GANGWAY_CUSTOM_HTTP_TEMPLATES_DIR
     #customHTMLTemplatesDir: /custom-templates
+
+    # Show the claims received from the issuer (defaults to: true)
+    # Env var: GANGWAY_SHOW_CLAIMS
+    #showClaims: true

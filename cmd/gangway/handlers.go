@@ -53,6 +53,7 @@ type userInfo struct {
 	ClusterCA    string
 	TrustedCA    string
 	HTTPPath     string
+	ShowClaims   bool
 }
 
 // homeInfo is used to store dynamic properties on
@@ -394,6 +395,7 @@ func generateInfo(w http.ResponseWriter, r *http.Request) *userInfo {
 		ClusterCA:    string(caBytes),
 		TrustedCA:    string(trustedCABytes),
 		HTTPPath:     cfg.HTTPPath,
+		ShowClaims:   cfg.ShowClaims,
 	}
 	return info
 }

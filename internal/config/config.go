@@ -46,9 +46,9 @@ type Config struct {
 	ClusterCAPath          string   `yaml:"clusterCAPath" envconfig:"cluster_ca_path"`
 	TrustedCAPath          string   `yaml:"trustedCAPath" envconfig:"trusted_ca_path"`
 	HTTPPath               string   `yaml:"httpPath" envconfig:"http_path"`
-
-	SessionSecurityKey     string `yaml:"sessionSecurityKey" envconfig:"SESSION_SECURITY_KEY"`
-	CustomHTMLTemplatesDir string `yaml:"customHTMLTemplatesDir" envconfig:"custom_http_templates_dir"`
+	ShowClaims             bool     `yaml:"showClaims" envconfig:"show_claims"`
+	SessionSecurityKey     string   `yaml:"sessionSecurityKey" envconfig:"SESSION_SECURITY_KEY"`
+	CustomHTMLTemplatesDir string   `yaml:"customHTMLTemplatesDir" envconfig:"custom_http_templates_dir"`
 }
 
 // NewConfig returns a Config struct from serialized config file
@@ -66,6 +66,7 @@ func NewConfig(configFile string) (*Config, error) {
 		KeyFile:                "/etc/gangway/tls/tls.key",
 		ClusterCAPath:          "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt",
 		HTTPPath:               "",
+		ShowClaims:             true,
 	}
 
 	if configFile != "" {
