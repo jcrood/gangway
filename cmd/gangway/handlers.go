@@ -26,8 +26,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/ghodss/yaml"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/jcrood/gangway/internal/oidc"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"

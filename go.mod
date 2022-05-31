@@ -3,8 +3,8 @@ module github.com/jcrood/gangway
 go 1.18
 
 require (
-	github.com/dgrijalva/jwt-go v3.1.0+incompatible
 	github.com/ghodss/yaml v1.0.0
+	github.com/golang-jwt/jwt/v4 v4.4.1
 	github.com/gorilla/securecookie v0.0.0-20160422134519-667fe4e3466a
 	github.com/gorilla/sessions v0.0.0-20160922145804-ca9ada445741
 	github.com/justinas/alice v0.0.0-20171023064455-03f45bd4b7da
