@@ -14,7 +14,7 @@
 
 PROJECT := gangway
 # Where to push the docker image.
-REGISTRY ?= gcr.io/heptio-images
+REGISTRY ?= jcrood
 IMAGE := $(REGISTRY)/$(PROJECT)
 SRCDIRS := ./cmd/gangway
 PKGS := $(shell go list ./cmd/... ./internal/...)
@@ -23,14 +23,11 @@ VERSION ?= master
 
 all: build
 
-build: deps bindata
+build: deps
 	go build ./...
 
 install:
 	go install -v ./cmd/gangway/...
-
-setup:
-	go get -u github.com/mjibson/esc/...
 
 check: test vet gofmt staticcheck misspell
 
@@ -39,9 +36,6 @@ deps:
 
 vet: | test
 	go vet ./...
-
-bindata:
-	esc -o cmd/gangway/bindata.go templates/
 
 test:
 	go test -v ./...
@@ -68,4 +62,4 @@ image:
 push:
 	docker push $(IMAGE):$(VERSION)
 
-.PHONY: all deps bindata test image setup
+.PHONY: all deps test image

@@ -63,8 +63,7 @@ kube-apiserver
 
 Requirements for building
 
-- Go (built with version >= 1.12)
-- [esc](https://github.com/mjibson/esc) for static resources.
+- Go (built with version >= 1.17)
 
 A Makefile is provided for building tasks. The options are as follows
 
