@@ -8,7 +8,7 @@ require (
 	github.com/gorilla/sessions v1.2.1
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/sirupsen/logrus v1.8.1
-	golang.org/x/crypto v0.0.0-20220214200702-86341886e292
+	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/client-go v0.24.1
