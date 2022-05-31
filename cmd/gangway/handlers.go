@@ -59,7 +59,8 @@ type userInfo struct {
 
 // homeInfo is used to store dynamic properties on
 type homeInfo struct {
-	HTTPPath string
+	ClusterName string
+	HTTPPath    string
 }
 
 //go:embed templates
@@ -166,7 +167,8 @@ func loginRequired(next http.Handler) http.Handler {
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	data := &homeInfo{
-		HTTPPath: cfg.HTTPPath,
+		ClusterName: cfg.ClusterName,
+		HTTPPath:    cfg.HTTPPath,
 	}
 
 	serveTemplate("home.tmpl", data, w)
