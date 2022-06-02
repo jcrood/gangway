@@ -25,6 +25,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/jcrood/gangway/assets"
 	"github.com/jcrood/gangway/internal/config"
 	"github.com/jcrood/gangway/internal/oidc"
 	"github.com/jcrood/gangway/internal/session"
@@ -87,6 +88,13 @@ func main() {
 	transportConfig = config.NewTransportConfig(cfg.TrustedCAPath)
 	gangwayUserSession = session.New(cfg.SessionSecurityKey)
 
+	var assetFs http.FileSystem
+	if cfg.CustomAssetsDir != "" {
+		assetFs = http.Dir("cfg.CustomAssetsDir")
+	} else {
+		assetFs = http.FS(assets.FS)
+	}
+
 	http.HandleFunc(cfg.GetRootPathPrefix(), httpLogger(rootPathHandler(homeHandler)))
 	http.HandleFunc(fmt.Sprintf("%s/login", cfg.HTTPPath), httpLogger(loginHandler))
 	http.HandleFunc(fmt.Sprintf("%s/callback", cfg.HTTPPath), httpLogger(callbackHandler))
@@ -95,6 +103,10 @@ func main() {
 	http.Handle(fmt.Sprintf("%s/logout", cfg.HTTPPath), loginRequired(http.HandlerFunc(logoutHandler)))
 	http.Handle(fmt.Sprintf("%s/commandline", cfg.HTTPPath), loginRequired(http.HandlerFunc(commandlineHandler)))
 	http.Handle(fmt.Sprintf("%s/kubeconf", cfg.HTTPPath), loginRequired(http.HandlerFunc(kubeConfigHandler)))
+
+	// assets
+	assetsPath := fmt.Sprintf("%s/assets/", cfg.HTTPPath)
+	http.Handle(assetsPath, http.StripPrefix(assetsPath, http.FileServer(assetFs)))
 
 	bindAddr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	// create http server with timeouts
@@ -110,8 +122,7 @@ func main() {
 			MinVersion: tls.VersionTLS12, // minimum TLS 1.2
 			// P curve order does not matter, as breaking one means all others can be brute-forced as well:
 			// Golang developers prefer:
-			CurvePreferences:         []tls.CurveID{tls.X25519, tls.CurveP256, tls.CurveP384, tls.CurveP521},
-			PreferServerCipherSuites: true, // Server chooses ciphersuite, order matters below:
+			CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256, tls.CurveP384, tls.CurveP521},
 			CipherSuites: []uint16{
 				tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
 				tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
@@ -147,5 +158,5 @@ func main() {
 
 	log.Println("Shutdown signal received, exiting.")
 	// close the HTTP server
-	httpServer.Shutdown(context.Background())
+	_ = httpServer.Shutdown(context.Background())
 }

@@ -29,6 +29,15 @@ build: deps
 install:
 	go install -v ./cmd/gangway/...
 
+setup:
+	curl -s -o assets/prism-core.min.js https://raw.githubusercontent.com/PrismJS/prism/v1.28.0/components/prism-core.min.js
+	curl -s -o assets/prism-bash.min.js https://raw.githubusercontent.com/PrismJS/prism/v1.28.0/components/prism-bash.min.js
+	curl -s -o assets/prism-yaml.min.js https://raw.githubusercontent.com/PrismJS/prism/v1.28.0/components/prism-yaml.min.js
+	curl -s -o assets/prism-powershell.min.js https://raw.githubusercontent.com/PrismJS/prism/v1.28.0/components/prism-powershell.min.js
+	curl -s -o assets/prism-tomorrow.min.css https://raw.githubusercontent.com/PrismJS/prism/v1.28.0/themes/prism-tomorrow.min.css
+	curl -s -o assets/materialize.min.css https://raw.githubusercontent.com/Dogfalo/materialize/v1-dev/dist/css/materialize.min.css
+	curl -s -o assets/materialize.min.js https://raw.githubusercontent.com/Dogfalo/materialize/v1-dev/dist/js/materialize.min.js
+
 check: test vet gofmt staticcheck misspell
 
 deps:

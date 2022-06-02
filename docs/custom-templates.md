@@ -11,4 +11,7 @@ To enable this feature, set the `customHTMLTemplatesDir` option in Gangway's con
 
 The templates are processed using Go's `html/template` [package][0].
 
+Assets to be used by custom templates can be pointed to by setting `customAssetsDir`. The contents will be served
+under /assets/
+
 [0]: https://golang.org/pkg/html/template/

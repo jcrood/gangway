@@ -32,3 +32,4 @@ The following table describes the options that can be set via the YAML configura
 | `httpPath` | The path gangway uses to create urls. Defaults to `""`. |
 | `showClaims` | Show the received claims. Defaults to `true`. |
 | `customHTMLTemplatesDir` | The path to a directory that contains custom HTML templates. |
+| `customAssetsDir` | The path to a directory that contains assets. |

@@ -91,9 +91,13 @@ data:
     #httpPath: "https://${GANGWAY_HTTP_PATH}"
 
     # The path to find custom HTML templates
-    # Env var: GANGWAY_CUSTOM_HTTP_TEMPLATES_DIR
+    # Env var: GANGWAY_CUSTOM_HTML_TEMPLATES_DIR
     #customHTMLTemplatesDir: /custom-templates
 
-    # Show the claims received from the issuer (defaults to: true)
+    # The path to find assets used in HTML templates
+    # Env var: GANGWAY_CUSTOM_ASSETS_DIR
+    #customHTMLTemplatesDir: /assets
+
+    # Show the claims received from the issuer (defaults to: false)
     # Env var: GANGWAY_SHOW_CLAIMS
-    #showClaims: true
+    #showClaims: false

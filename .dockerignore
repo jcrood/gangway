@@ -1,0 +1,8 @@
+.git
+.idea
+assets
+!assets/fs.go
+!assets/gangway.css
+!assets/gangway.js
+docs
+

@@ -20,7 +20,7 @@ import (
 	"strings"
 
 	"github.com/kelseyhightower/envconfig"
-	"gopkg.in/yaml.v2"
+	"sigs.k8s.io/yaml"
 )
 
 // Config the configuration field for gangway
@@ -48,7 +48,8 @@ type Config struct {
 	HTTPPath               string   `yaml:"httpPath" envconfig:"http_path"`
 	ShowClaims             bool     `yaml:"showClaims" envconfig:"show_claims"`
 	SessionSecurityKey     string   `yaml:"sessionSecurityKey" envconfig:"SESSION_SECURITY_KEY"`
-	CustomHTMLTemplatesDir string   `yaml:"customHTMLTemplatesDir" envconfig:"custom_http_templates_dir"`
+	CustomHTMLTemplatesDir string   `yaml:"customHTMLTemplatesDir" envconfig:"custom_html_templates_dir"`
+	CustomAssetsDir        string   `yaml:"customAssetsDir" envconfig:"custom_assets_dir"`
 }
 
 // NewConfig returns a Config struct from serialized config file
@@ -66,7 +67,7 @@ func NewConfig(configFile string) (*Config, error) {
 		KeyFile:                "/etc/gangway/tls/tls.key",
 		ClusterCAPath:          "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt",
 		HTTPPath:               "",
-		ShowClaims:             true,
+		ShowClaims:             false,
 	}
 
 	if configFile != "" {

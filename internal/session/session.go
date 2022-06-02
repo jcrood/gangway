@@ -16,8 +16,10 @@ package session
 
 import (
 	"crypto/sha256"
-	"golang.org/x/crypto/pbkdf2"
 	"net/http"
+
+	log "github.com/sirupsen/logrus"
+	"golang.org/x/crypto/pbkdf2"
 )
 
 const salt = "MkmfuPNHnZBBivy0L0aW"
@@ -55,5 +57,8 @@ func (s *Session) Cleanup(w http.ResponseWriter, r *http.Request, name string) {
 		return
 	}
 	session.Options.MaxAge = -1
-	session.Save(r, w)
+	err = session.Save(r, w)
+	if err != nil {
+		log.Errorf("failed to save session: %v", err)
+	}
 }

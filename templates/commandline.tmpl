@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Gangway</title>
+    <base href="{{ .HTTPPath }}/">
+    <link type="text/css" rel="stylesheet" href="assets/materialize.min.css"  media="screen"/>
+    <link type="text/css" rel="stylesheet" href="assets/prism-tomorrow.min.css" media="screen"/>
+    <link type="text/css" rel="stylesheet" href="assets/gangway.css" media="screen"/>
+</head>
+<body>
+<nav class="light-blue blue">
+    <div class="nav-wrapper container">
+        <a href="#" class="brand-logo">gangway</a>
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+    <h4 class="center">Welcome {{ .Username }}.</h4>
+    <p class="flow-text">In order to get command-line access to the <strong>{{ .ClusterName }}</strong> Kubernetes
+        cluster, you will need to configure OpenID Connect (OIDC) authentication for your client.</p>
+    <p>
+        <a href="{{ .HTTPPath }}/kubeconf" class="waves-effect waves-light btn-large blue">Download Kubeconfig</a>
+    </p>
+</div>
+
+<div class="container">
+    <h5>Config cluster context</h5>
+    <p>Once kubectl is installed (see below), you may execute the following:</p>
+    <div class="card">
+        <div class="card-tabs">
+            <ul class="tabs">
+                <li class="tab"><a class="active" href="#config-section-bash">Bash</a></li>
+                <li class="tab"><a href="#config-section-ps">PowerShell</a></li>
+            </ul>
+        </div>
+
+        <div class="card-content grey lighten-4">
+            <div class="right-align">
+                <a class="waves-effect waves-light btn-small btn-copy blue">Copy to clipboard</a>
+            </div>
+
+            <pre id="config-section-bash"><code class="language-bash">echo "{{ .ClusterCA }}" \ > "ca-{{ .ClusterName }}.pem"
+kubectl config set-cluster "{{ .ClusterName }}" --server={{ .APIServerURL }} --certificate-authority="ca-{{ .ClusterName }}.pem" --embed-certs
+kubectl config set-credentials "{{ .KubeCfgUser }}"  \
+    --auth-provider=oidc  \
+    --auth-provider-arg='idp-issuer-url={{ .IssuerURL }}'  \
+    --auth-provider-arg='client-id={{ .ClientID }}'  \
+    --auth-provider-arg='client-secret={{ .ClientSecret }}' \
+    --auth-provider-arg='refresh-token={{ .RefreshToken }}' \
+    --auth-provider-arg='id-token={{ .IDToken }}'
+kubectl config set-context "{{ .ClusterName }}" --cluster="{{ .ClusterName }}" --user="{{ .KubeCfgUser }}"
+kubectl config use-context "{{ .ClusterName }}"
+rm "ca-{{ .ClusterName }}.pem"</code></pre>
+            <pre id="config-section-ps"><code class="language-powershell">$ClusterCA = "{{ .ClusterCA }}"
+Set-Content -Path "ca-{{ .ClusterName }}.pem" -Value $ClusterCA
+kubectl config set-cluster "{{ .ClusterName }}" --server={{ .APIServerURL }} --certificate-authority="ca-{{ .ClusterName }}.pem" --embed-certs
+kubectl config set-credentials "{{ .KubeCfgUser }}"  `
+    --auth-provider=oidc  `
+    --auth-provider-arg='idp-issuer-url={{ .IssuerURL }}'  `
+    --auth-provider-arg='client-id={{ .ClientID }}'  `
+    --auth-provider-arg='client-secret={{ .ClientSecret }}' `
+    --auth-provider-arg='refresh-token={{ .RefreshToken }}' `
+    --auth-provider-arg='id-token={{ .IDToken }}'
+kubectl config set-context "{{ .ClusterName }}" --cluster="{{ .ClusterName }}" --user="{{ .KubeCfgUser }}"
+kubectl config use-context "{{ .ClusterName }}"
+Remove-Item "ca-{{ .ClusterName }}.pem"</code></pre>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <h5>Install kubectl</h5>
+    <p>The Kubernetes command-line utility, kubectl, may be installed like so:</p>
+    <div class="card">
+        <div class="card-tabs">
+            <ul class="tabs">
+                <li class="tab"><a class="active" href="#install-section-bash">Bash</a></li>
+                <li class="tab"><a href="#install-section-ps">PowerShell</a></li>
+            </ul>
+        </div>
+
+        <div class="card-content grey lighten-4">
+            <div class="right-align">
+                <a class="waves-effect waves-light btn-small btn-copy blue">Copy to clipboard</a>
+            </div>
+
+            <pre id="install-section-bash"><code class="language-bash">curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/$(uname | awk '{print tolower($0)}')/amd64/kubectl
+chmod +x ./kubectl
+sudo mv ./kubectl /usr/local/bin/kubectl</code></pre>
+            <pre id="install-section-ps"><code class="language-powershell">Install-Script -Name install-kubectl -Scope CurrentUser -Force
+New-Item -Path 'C:\Program Files\Kubectl' -ItemType Directory
+install-kubectl.ps1 -DownloadLocation 'C:\Program Files\Kubectl'</code></pre>
+        </div>
+    </div>
+</div>
+
+{{- if .ShowClaims -}}
+<div class="container">
+    <h5>Claim dump</h5>
+    <p>Claims received from the upstream issuer:</p>
+    <div class="card">
+        <div class="card-content grey lighten-4">
+            <pre><code class="language-yaml">
+{{- range $key, $value := .Claims -}}
+    {{- if eq $key "groups" -}}
+        {{- printf "%s:\n" $key -}}
+        {{- range $groupName := $value -}}
+            {{- printf "- \"%s\"\n" $groupName -}}
+        {{- end -}}
+    {{- else -}}
+        {{- if eq (printf "%T" $value) "string" -}}
+            {{- printf "%s: \"%s\"\n" $key $value -}}
+        {{- else if eq (printf "%T" $value) "bool" -}}
+            {{- if eq $value true -}}
+                {{- printf "%s: true\n" $key -}}
+            {{- else -}}
+                {{- printf "%s: false\n" $key -}}
+            {{ end }}
+        {{- else if or (eq (printf "%T" $value) "float64") (eq (printf "%T" $value) "float32") -}}
+            {{- printf "%s: %f\n" $key $value -}}
+        {{- else -}}
+            {{- printf "%s: %d\n" $key $value -}}
+        {{- end -}}
+    {{- end -}}
+{{- end -}}
+            </code></pre>
+        </div>
+    </div>
+</div>
+{{- end -}}
+
+<script type="text/javascript" src="assets/materialize.min.js"></script>
+<script type="text/javascript" src="assets/prism-core.min.js"></script>
+<script type="text/javascript" src="assets/prism-bash.min.js"></script>
+<script type="text/javascript" src="assets/prism-yaml.min.js"></script>
+<script type="text/javascript" src="assets/prism-powershell.min.js"></script>
+<script type="text/javascript" src="assets/gangway.js"></script>
+
+</body>
+</html>
