@@ -317,24 +317,27 @@ func generateInfo(w http.ResponseWriter, r *http.Request) *userInfo {
 		// does not impact actual function of program
 		log.Warningf("Could not read CA file: %s", err)
 	}
-	// read in trusted ca cert to output in commandline copy/paste commands
-	file, err = os.Open(cfg.TrustedCAPath)
-	if err != nil {
-		// let us know that we couldn't open the file. This only causes missing output
-		// does not impact actual function of program
-		log.Errorf("Failed to open TrustedCA file. %s", err)
-	}
-	defer func(file *os.File) {
-		err := file.Close()
+	var trustedCABytes []byte
+	if cfg.TrustedCAPath != "" {
+		// read in trusted ca cert to output in commandline copy/paste commands
+		file, err = os.Open(cfg.TrustedCAPath)
 		if err != nil {
-			log.Errorf("Failed to close TrustedCA file: %v", err)
+			// let us know that we couldn't open the file. This only causes missing output
+			// does not impact actual function of program
+			log.Errorf("Failed to open TrustedCA file. %s", err)
 		}
-	}(file)
-	trustedCABytes, err := ioutil.ReadAll(file)
-	if err != nil {
-		// let us know that we couldn't open the file. This only causes missing output
-		// does not impact actual function of program
-		log.Warningf("Failed to read TrustedCA file. %s", err)
+		defer func(file *os.File) {
+			err := file.Close()
+			if err != nil {
+				log.Errorf("Failed to close TrustedCA file: %v", err)
+			}
+		}(file)
+		trustedCABytes, err = ioutil.ReadAll(file)
+		if err != nil {
+			// let us know that we couldn't open the file. This only causes missing output
+			// does not impact actual function of program
+			log.Warningf("Failed to read TrustedCA file. %s", err)
+		}
 	}
 
 	// load the session cookies
