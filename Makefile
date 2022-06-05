@@ -17,7 +17,6 @@ PROJECT := gangway
 REGISTRY ?= jcrood
 IMAGE := $(REGISTRY)/$(PROJECT)
 SRCDIRS := ./cmd/gangway
-PKGS := $(shell go list ./cmd/... ./internal/...)
 
 VERSION ?= master
 
@@ -38,20 +37,16 @@ setup:
 	curl -s -o assets/materialize.min.css https://raw.githubusercontent.com/Dogfalo/materialize/v1-dev/dist/css/materialize.min.css
 	curl -s -o assets/materialize.min.js https://raw.githubusercontent.com/Dogfalo/materialize/v1-dev/dist/js/materialize.min.js
 
-check: test vet gofmt staticcheck misspell
+check: test lint gofmt misspell
 
 deps:
 	go mod tidy && go mod vendor && go mod verify
 
-vet: | test
-	go vet ./...
-
 test:
 	go test -v ./...
 
-staticcheck:
-	@go get honnef.co/go/tools/cmd/staticcheck
-	staticcheck $(PKGS)
+lint:
+	golangci-lint run
 
 misspell:
 	@go get github.com/client9/misspell/cmd/misspell
