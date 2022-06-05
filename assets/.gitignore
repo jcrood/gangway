@@ -1,5 +1,2 @@
-*
-!.gitignore
-!fs.go
-!gangway.js
-!gangway.css
+materialize.*
+prism-*
