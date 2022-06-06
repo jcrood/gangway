@@ -1,16 +1,54 @@
 ---
-name: 'build images'
-on:
-  workflow_run:
-    workflows: ["Test"]
-    types:
-      - completed
+name: 'Lint, Test and Build'
+on: [push,pull_request]
+
+env:
+  GOLANG_VERSION: '1.18.3'
+
 permissions:
-  packages: write
+  contents: read
+
 jobs:
-  build:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
+    steps:
+      - name: "🍌 Check out code"
+        uses: actions/checkout@v3
+
+      - name: "⚙️ Set up Go"
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ env.GOLANG_VERSION }}
+
+      - name: "🔬 Lint"
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.46
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: "🍌 Check out code"
+        uses: actions/checkout@v3
+
+      - name: "⚙️ Set up Go"
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ env.GOLANG_VERSION }}
+          check-latest: true
+          cache: true
+
+      - name: "🧪 Test"
+        run: |
+          make setup
+          make build
+          make test
+  build:
+    needs: [ lint, test ]
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
     steps:
       - name: "🍌 Check out code"
         uses: actions/checkout@v3
@@ -28,13 +66,13 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
-            type=ref,event=branch
+            type=edge,branch=master
             type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
 
       - name: "🔐 Login to GHCR"
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && (github.ref_name == 'master' || github.ref_type == 'tag')
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
@@ -46,7 +84,7 @@ jobs:
         with:
           context: .
           platforms: linux/amd64,linux/arm64
-          push: ${{ github.event_name != 'pull_request' }}
+          push: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
