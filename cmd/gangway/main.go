@@ -86,7 +86,7 @@ func main() {
 	}
 
 	transportConfig = config.NewTransportConfig(cfg.TrustedCAPath)
-	gangwayUserSession = session.New(cfg.SessionSecurityKey)
+	gangwayUserSession = session.New(cfg.SessionSecurityKey, cfg.SessionSalt)
 
 	var assetFs http.FileSystem
 	if cfg.CustomAssetsDir != "" {

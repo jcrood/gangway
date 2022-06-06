@@ -36,7 +36,7 @@ import (
 )
 
 func testInit() {
-	gangwayUserSession = session.New("test")
+	gangwayUserSession = session.New("test", "0123456789")
 	transportConfig = config.NewTransportConfig("")
 
 	oauth2Cfg = &oauth2.Config{
@@ -434,7 +434,7 @@ func TestUnauthedCommandlineHandlerRedirect(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	session.New("test")
+	session.New("test", "0123456789")
 
 	rr := httptest.NewRecorder()
 	handler := http.HandlerFunc(commandlineHandler)

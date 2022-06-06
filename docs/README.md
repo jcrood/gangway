@@ -16,13 +16,16 @@ While this is called a secret, based on the way that OAuth2 works with command l
 This will be divulged to any client that is configured through gangway.
 As such, it is probably acceptable to keep that secret in the config file and not worry about managing it as a true secret.
 
-We also have a secret string that is used to as a way to encrypt the cookies that are returned to the users.
-If using the example YAML, create a secret to hold this value with the following command line:
+We also have a secret string and salt that is used to as a way to encrypt the cookies that are returned 
+to the users. If using the example YAML, create a secret to hold these values with the following command line:
 
 ```
 kubectl -n gangway create secret generic gangway-key \
-  --from-literal=sessionkey=$(openssl rand -base64 32)
+  --from-literal=sessionkey=$(openssl rand -base64 32) \
+  --from-literal=sessionsalt=$(openssl rand -base64 32)
 ```
+
+Setting a salt is optional; if the config variable is not set a default baked in salt will be used.
 
 ## Path Prefix
 

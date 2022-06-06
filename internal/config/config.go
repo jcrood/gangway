@@ -23,6 +23,8 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
+const hardCodedDefaultSalt = "MkmfuPNHnZBBivy0L0aW"
+
 // Config the configuration field for gangway
 type Config struct {
 	Host string `yaml:"host"`
@@ -48,6 +50,7 @@ type Config struct {
 	HTTPPath               string   `yaml:"httpPath" envconfig:"http_path"`
 	ShowClaims             bool     `yaml:"showClaims" envconfig:"show_claims"`
 	SessionSecurityKey     string   `yaml:"sessionSecurityKey" envconfig:"SESSION_SECURITY_KEY"`
+	SessionSalt            string   `yaml:"sessionSalt" envconfig:"SESSION_SALT"`
 	CustomHTMLTemplatesDir string   `yaml:"customHTMLTemplatesDir" envconfig:"custom_html_templates_dir"`
 	CustomAssetsDir        string   `yaml:"customAssetsDir" envconfig:"custom_assets_dir"`
 }
@@ -68,6 +71,7 @@ func NewConfig(configFile string) (*Config, error) {
 		ClusterCAPath:          "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt",
 		HTTPPath:               "",
 		ShowClaims:             false,
+		SessionSalt:            hardCodedDefaultSalt,
 	}
 
 	if configFile != "" {
@@ -111,6 +115,7 @@ func (cfg *Config) Validate() error {
 		{cfg.RedirectURL == "", "no redirectURL specified"},
 		{cfg.SessionSecurityKey == "", "no SessionSecurityKey specified"},
 		{cfg.APIServerURL == "", "no apiServerURL specified"},
+		{len(cfg.SessionSalt) < 8, "salt needs to be min. 8 characters"},
 	}
 
 	for _, check := range checks {

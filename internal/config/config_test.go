@@ -27,6 +27,7 @@ func TestConfigNotFound(t *testing.T) {
 }
 
 func TestEnvionmentOverrides(t *testing.T) {
+	salt := "randombanana"
 	os.Setenv("GANGWAY_AUTHORIZE_URL", "https://foo.bar/authorize")
 	os.Setenv("GANGWAY_APISERVER_URL", "https://k8s-api.foo.baz")
 	os.Setenv("GANGWAY_CLIENT_ID", "foo")
@@ -39,6 +40,7 @@ func TestEnvionmentOverrides(t *testing.T) {
 	os.Setenv("GANGWAY_AUDIENCE", "foo")
 	os.Setenv("GANGWAY_SCOPES", "groups,sub")
 	os.Setenv("GANGWAY_SHOW_CLAIMS", "false")
+	os.Setenv("GANGWAY_SESSION_SALT", salt)
 	cfg, err := NewConfig("")
 	if err != nil {
 		t.Errorf("Failed to test config overrides with error: %s", err)
@@ -58,6 +60,28 @@ func TestEnvionmentOverrides(t *testing.T) {
 
 	if cfg.ShowClaims != false {
 		t.Errorf("Failed to disable showing of claims. Expected %t but got %t", false, cfg.ShowClaims)
+	}
+	if cfg.SessionSalt != salt {
+		t.Errorf("Failed to override session salt. Expected %s but got %s", salt, cfg.SessionSalt)
+	}
+}
+
+func TestSessionSaltLength(t *testing.T) {
+	salt := "2short"
+	os.Setenv("GANGWAY_AUTHORIZE_URL", "https://foo.bar/authorize")
+	os.Setenv("GANGWAY_APISERVER_URL", "https://k8s-api.foo.baz")
+	os.Setenv("GANGWAY_CLIENT_ID", "foo")
+	os.Setenv("GANGWAY_CLIENT_SECRET", "bar")
+	os.Setenv("GANGWAY_REDIRECT_URL", "https://foo.baz/callback")
+	os.Setenv("GANGWAY_SESSION_SECURITY_KEY", "testing")
+	os.Setenv("GANGWAY_TOKEN_URL", "https://foo.bar/token")
+	os.Setenv("GANGWAY_SESSION_SALT", salt)
+	_, err := NewConfig("")
+	if err == nil {
+		t.Errorf("Expected error but got none")
+	}
+	if err.Error() != "invalid config: salt needs to be min. 8 characters" {
+		t.Errorf("Wrong error. Expected %v but got %v", "salt needs to be min. 8 characters", err)
 	}
 }
 
