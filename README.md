@@ -1,8 +1,13 @@
+# This is a fork of Heptio Gangway! 
+
+... which was EOL-ed by VMware. See https://github.com/vmware-archive/gangway for the original.
+
+This fork aims to continue development of Gangway for the two people still using it ;) It 
+has several of the PRs on the original merged, fixes a couple of the open issues and adds a
+few other new bits. See the [changelog](CHANGELOG.md) for details.
 
 gangway
 =======
-
-# This is a fork of Heptio Gangway, which was EOL-ed by VMware. See https://github.com/vmware-archive/gangway for the original
 
 _(noun): An opening in the bulwark of the ship to allow passengers to board or leave the ship._
 
