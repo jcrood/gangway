@@ -28,6 +28,11 @@ spec:
             secretKeyRef:
               name: gangway-key
               key: sessionkey
+        - name: GANGWAY_SESSION_SALT
+          valueFrom:
+            secretKeyRef:
+              name: gangway-key
+              key: sessionsalt
         ports:
         - name: http
           containerPort: 8080

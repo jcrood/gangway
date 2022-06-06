@@ -27,6 +27,12 @@ when the IDP uses a self-signed CA. Merged from https://github.com/vmware-archiv
 Adds the `customAssetsDir` config option to override the contents of /assets/ for use in 
 custom templates.
 
+
+### Override hard-coded session salt
+
+Adds the `sessionSalt` config option to override the hard-coded salt. Min. length is 8 characters.
+Fixes https://github.com/vmware-archive/gangway/issues/71
+
 ### todo
 
 ...
