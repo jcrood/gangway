@@ -64,8 +64,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: |
-            jcrood/gangway
+          images: jcrood/gangway
           tags: |
             type=edge,branch=master
             type=ref,event=pr
