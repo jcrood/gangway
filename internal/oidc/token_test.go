@@ -55,7 +55,7 @@ func TestParseToken(t *testing.T) {
 		"rsa": {
 			idToken:      "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.EkN-DOsnsuRjRO6BxXemmJDm3HbxrbRzXglbN2S4sOkopdU4IsDxTI8jO19W_A4K8ZPJijNLis4EZsHeY559a4DFOd50_OqgHGuERTqYZyuhtF39yxJPAjUESwxk2J5k_4zM3O-vtd1Ghyo4IbqKKSy6J9mTniYJPenn5-HIirE",
 			clientSecret: "",
-			expectError:  false,
+			expectError:  true,
 			want: &jwt.Token{
 				Raw:    "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.EkN-DOsnsuRjRO6BxXemmJDm3HbxrbRzXglbN2S4sOkopdU4IsDxTI8jO19W_A4K8ZPJijNLis4EZsHeY559a4DFOd50_OqgHGuERTqYZyuhtF39yxJPAjUESwxk2J5k_4zM3O-vtd1Ghyo4IbqKKSy6J9mTniYJPenn5-HIirE",
 				Method: jwt.SigningMethodRS256,
@@ -72,6 +72,25 @@ func TestParseToken(t *testing.T) {
 				Valid:     false,
 			},
 		},
+		"invalid": {
+			idToken:      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIiLCJleHAiOjE1MDAwLCJpc3MiOiJ0ZXN0In0.HE7fK0xOQwFEr4WDgRWj4teRPZ6i3GLwD5YCm6Pwu_c",
+			clientSecret: "",
+			expectError:  true,
+			want:         nil,
+		},
+		"alg-none": {
+			// uses {"alg":"none","typ":"JWT"}
+			idToken:      "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0K.eyJmb28iOiJiYXIiLCJleHAiOjE1MDAwLCJpc3MiOiJ0ZXN0aiIsImlhdCI6MTQyMjc3OTYzOH0K.",
+			clientSecret: "",
+			expectError:  true,
+			want:         nil,
+		},
+		"abc": {
+			idToken:      "I know my ABCs",
+			clientSecret: "",
+			expectError:  true,
+			want:         nil,
+		},
 	}
 
 	for name, tc := range tests {
@@ -82,8 +101,10 @@ func TestParseToken(t *testing.T) {
 			// If we expect an error, check that it's thrown
 			if tc.expectError {
 				if err == nil {
-					t.Fatalf("Error was returned but not expected: %v", err)
+					t.Fatalf("No error was returned but one expected")
 				}
+			} else if err != nil {
+				t.Fatalf("Error was returned but not expected: %v", err)
 			} else {
 				// We don't expect an error, check the result
 				if got.Valid != tc.want.Valid {
