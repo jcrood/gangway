@@ -65,8 +65,8 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: |
-            ghcr.io/${{ github.repository }}
-            ${{ github.repository }}
+            ghcr.io/jcrood/gangway
+            jcrood/gangway
           tags: |
             type=edge,branch=master
             type=ref,event=pr
