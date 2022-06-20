@@ -22,12 +22,9 @@ import (
 	htmltemplate "html/template"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/golang-jwt/jwt/v4"
-	"github.com/jcrood/gangway/internal/oidc"
 	"github.com/jcrood/gangway/templates"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
@@ -39,7 +36,7 @@ import (
 type userInfo struct {
 	ClusterName  string
 	Username     string
-	Claims       jwt.MapClaims
+	Claims       map[string]interface{}
 	KubeCfgUser  string
 	IDToken      string
 	RefreshToken string
@@ -226,7 +223,6 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	// verify the state string
 	state := r.URL.Query().Get("state")
-
 	if state != session.Values["state"] {
 		http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
 		return
@@ -234,14 +230,29 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	// use the access code to retrieve a token
 	code := r.URL.Query().Get("code")
-	token, err := o2token.Exchange(ctx, code)
+	oauth2Token, err := oauth2Cfg.Exchange(ctx, code)
+	// token, err := o2token.Exchange(ctx, code)
 	if err != nil {
+		log.Errorf("failed to exchange token: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	sessionIDToken.Values["id_token"] = token.Extra("id_token")
-	sessionRefreshToken.Values["refresh_token"] = token.RefreshToken
+	rawIDToken, ok := oauth2Token.Extra("id_token").(string)
+	if !ok {
+		log.Errorf("no id_token found")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	_, err = verifier.Verify(ctx, rawIDToken)
+	if err != nil {
+		log.Errorf("failed to verify token: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	sessionIDToken.Values["id_token"] = rawIDToken
+	sessionRefreshToken.Values["refresh_token"] = oauth2Token.RefreshToken
 
 	// save the session cookies
 	err = session.Save(r, w)
@@ -298,48 +309,6 @@ func kubeConfigHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func generateInfo(w http.ResponseWriter, r *http.Request) *userInfo {
-	// read in public ca.crt to output in commandline copy/paste commands
-	file, err := os.Open(cfg.ClusterCAPath)
-	if err != nil {
-		// let us know that we couldn't open the file. This only causes missing output
-		// does not impact actual function of program
-		log.Errorf("Failed to open CA file. %s", err)
-	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			log.Errorf("Failed to close CA file: %v", err)
-		}
-	}(file)
-	caBytes, err := ioutil.ReadAll(file)
-	if err != nil {
-		// let us know that we couldn't open the file. This only causes missing output
-		// does not impact actual function of program
-		log.Warningf("Could not read CA file: %s", err)
-	}
-	var trustedCABytes []byte
-	if cfg.TrustedCAPath != "" {
-		// read in trusted ca cert to output in commandline copy/paste commands
-		file, err = os.Open(cfg.TrustedCAPath)
-		if err != nil {
-			// let us know that we couldn't open the file. This only causes missing output
-			// does not impact actual function of program
-			log.Errorf("Failed to open TrustedCA file. %s", err)
-		}
-		defer func(file *os.File) {
-			err := file.Close()
-			if err != nil {
-				log.Errorf("Failed to close TrustedCA file: %v", err)
-			}
-		}(file)
-		trustedCABytes, err = ioutil.ReadAll(file)
-		if err != nil {
-			// let us know that we couldn't open the file. This only causes missing output
-			// does not impact actual function of program
-			log.Warningf("Failed to read TrustedCA file. %s", err)
-		}
-	}
-
 	// load the session cookies
 	sessionIDToken, err := gangwayUserSession.Session.Get(r, "gangway_id_token")
 	if err != nil {
@@ -352,7 +321,7 @@ func generateInfo(w http.ResponseWriter, r *http.Request) *userInfo {
 		return nil
 	}
 
-	idToken, ok := sessionIDToken.Values["id_token"].(string)
+	rawIDToken, ok := sessionIDToken.Values["id_token"].(string)
 	if !ok {
 		gangwayUserSession.Cleanup(w, r, "gangway")
 		gangwayUserSession.Cleanup(w, r, "gangway_id_token")
@@ -372,13 +341,23 @@ func generateInfo(w http.ResponseWriter, r *http.Request) *userInfo {
 		return nil
 	}
 
-	jwtToken, err := oidc.ParseToken(idToken, cfg.ClientSecret)
+	ctx := context.WithValue(r.Context(), oauth2.HTTPClient, transportConfig.HTTPClient)
+
+	idToken, err := verifier.Verify(ctx, rawIDToken)
 	if err != nil {
-		http.Error(w, "Could not parse JWT", http.StatusInternalServerError)
+		log.Errorf("failed to verify token: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return nil
 	}
 
-	claims := jwtToken.Claims.(jwt.MapClaims)
+	claims := make(map[string]interface{})
+	err = idToken.Claims(&claims)
+	if err != nil {
+		log.Errorf("failed to unmarshal claims: %v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return nil
+	}
+
 	username, ok := claims[cfg.UsernameClaim].(string)
 	if !ok {
 		http.Error(w, "Could not parse Username claim", http.StatusInternalServerError)
@@ -406,14 +385,14 @@ func generateInfo(w http.ResponseWriter, r *http.Request) *userInfo {
 		Username:     username,
 		Claims:       claims,
 		KubeCfgUser:  kubeCfgUser,
-		IDToken:      idToken,
+		IDToken:      rawIDToken,
 		RefreshToken: refreshToken,
 		ClientID:     cfg.ClientID,
 		ClientSecret: cfg.ClientSecret,
 		IssuerURL:    issuerURL,
 		APIServerURL: cfg.APIServerURL,
-		ClusterCA:    string(caBytes),
-		TrustedCA:    string(trustedCABytes),
+		ClusterCA:    string(cfg.ClusterCA),
+		TrustedCA:    string(cfg.TrustedCA),
 		HTTPPath:     cfg.HTTPPath,
 		ShowClaims:   cfg.ShowClaims,
 	}

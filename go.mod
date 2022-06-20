@@ -3,13 +3,14 @@ module github.com/jcrood/gangway
 go 1.18
 
 require (
-	github.com/golang-jwt/jwt/v4 v4.4.1
+	github.com/coreos/go-oidc/v3 v3.2.0
 	github.com/gorilla/securecookie v1.1.1
 	github.com/gorilla/sessions v1.2.1
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/sirupsen/logrus v1.8.1
 	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e
 	golang.org/x/oauth2 v0.0.0-20220524215830-622c5d57e401
+	gopkg.in/square/go-jose.v2 v2.5.1
 	k8s.io/client-go v0.24.1
 	sigs.k8s.io/yaml v1.3.0
 )
