@@ -189,5 +189,5 @@ Once Gangway is deployed and functional and the Identity Provider is functional 
 A recent release of Gangway is available at
 
 ```
-gcr.io/heptio-images/gangway:<tag>
+jcrood/gangway:<tag>
 ```

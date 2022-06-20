@@ -47,7 +47,7 @@ Fixes https://github.com/vmware-archive/gangway/issues/71
 * BREAKING - corrected ENV variable name of `customHTMLTemplatesDir` to `CUSTOM_HTML_TEMPLATES_DIR`,
   this was (incorrectly) `CUSTOM_HTTP_TEMPLATES_DIR`
 * Config option `showClaims` to show/hide received claims
-* Propagate JWT parse error (https://github.com/vmware-archive/gangway/issues/73)
+* Validate JWT signatures
 
 ## v3.3.0 (2021-07-15)
 
