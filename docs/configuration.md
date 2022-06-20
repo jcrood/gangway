@@ -16,8 +16,7 @@ The following table describes the options that can be set via the YAML configura
 | `certFile` | The public cert file (including root and intermediates) to use when serving TLS. Defaults to `/etc/gangway/tls/tls.crt`. |
 | `keyFile` | The private key file when serving TLS. Defaults to `/etc/gangway/tls/tls.key`. |
 | `clusterName` | The cluster name. Used in the UI and kubectl config instructions |
-| `authorizeURL` | OAuth2 URL to start authorization flow.|
-| `tokenURL` | OAuth2 URL to obtain access tokens. |
+| `providerURL` | OAuth2 Provider URL. Should offer `$providerURL/.well-known/openid-configuration` endpoint for discovery.|
 | `audience` | Endpoint that provides user profile information [optional]. Not all providers require this. |
 | `scopes` | Used to specify the scope of the requested Oauth authorization. Defaults to `["openid", "profile", "email", "offline_access"]` |
 | `redirectURL` | Where to redirect back to. This should be a URL where gangway is reachable. Typically this also needs to be registered as part of the oauth application with the oAuth provider. |

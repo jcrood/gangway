@@ -25,9 +25,9 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/jcrood/gangway/assets"
 	"github.com/jcrood/gangway/internal/config"
-	"github.com/jcrood/gangway/internal/oidc"
 	"github.com/jcrood/gangway/internal/session"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
@@ -35,9 +35,12 @@ import (
 
 var cfg *config.Config
 var oauth2Cfg *oauth2.Config
-var o2token oidc.OAuth2Token
+
 var gangwayUserSession *session.Session
+
 var transportConfig *config.TransportConfig
+var provider *oidc.Provider
+var verifier *oidc.IDTokenVerifier
 
 // wrapper function for http logging
 func httpLogger(fn http.HandlerFunc) http.HandlerFunc {
@@ -70,22 +73,24 @@ func main() {
 		os.Exit(1)
 	}
 
+	ctx := context.Background()
+	provider, err = oidc.NewProvider(ctx, cfg.ProviderURL)
+	if err != nil {
+		log.Errorf("Could not create OIDC provider: %s", err)
+		os.Exit(2)
+	}
+
+	verifier = provider.Verifier(&oidc.Config{ClientID: cfg.ClientID})
+
 	oauth2Cfg = &oauth2.Config{
 		ClientID:     cfg.ClientID,
 		ClientSecret: cfg.ClientSecret,
 		RedirectURL:  cfg.RedirectURL,
 		Scopes:       cfg.Scopes,
-		Endpoint: oauth2.Endpoint{
-			AuthURL:  cfg.AuthorizeURL,
-			TokenURL: cfg.TokenURL,
-		},
+		Endpoint:     provider.Endpoint(),
 	}
 
-	o2token = &oidc.Token{
-		OAuth2Cfg: oauth2Cfg,
-	}
-
-	transportConfig = config.NewTransportConfig(cfg.TrustedCAPath)
+	transportConfig = config.NewTransportConfig(cfg.TrustedCA)
 	gangwayUserSession = session.New(cfg.SessionSecurityKey, cfg.SessionSalt)
 
 	var assetFs http.FileSystem

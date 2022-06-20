@@ -28,15 +28,14 @@ func TestConfigNotFound(t *testing.T) {
 
 func TestEnvionmentOverrides(t *testing.T) {
 	salt := "randombanana"
-	os.Setenv("GANGWAY_AUTHORIZE_URL", "https://foo.bar/authorize")
+	os.Setenv("GANGWAY_PROVIDER_URL", "https://foo.bar/authorize")
 	os.Setenv("GANGWAY_APISERVER_URL", "https://k8s-api.foo.baz")
 	os.Setenv("GANGWAY_CLIENT_ID", "foo")
 	os.Setenv("GANGWAY_CLIENT_SECRET", "bar")
 	os.Setenv("GANGWAY_PORT", "1234")
 	os.Setenv("GANGWAY_REDIRECT_URL", "https://foo.baz/callback")
-	os.Setenv("GANGWAY_CLUSTER_CA_PATH", "/etc/ssl/certs/ca-certificates.crt")
+	os.Setenv("GANGWAY_CLUSTER_CA_PATH", "") // FIXME: add test fixture
 	os.Setenv("GANGWAY_SESSION_SECURITY_KEY", "testing")
-	os.Setenv("GANGWAY_TOKEN_URL", "https://foo.bar/token")
 	os.Setenv("GANGWAY_AUDIENCE", "foo")
 	os.Setenv("GANGWAY_SCOPES", "groups,sub")
 	os.Setenv("GANGWAY_SHOW_CLAIMS", "false")
@@ -44,6 +43,9 @@ func TestEnvionmentOverrides(t *testing.T) {
 	cfg, err := NewConfig("")
 	if err != nil {
 		t.Errorf("Failed to test config overrides with error: %s", err)
+	}
+	if cfg == nil {
+		t.Fatalf("No config present")
 	}
 
 	if cfg.Port != 1234 {
@@ -68,13 +70,12 @@ func TestEnvionmentOverrides(t *testing.T) {
 
 func TestSessionSaltLength(t *testing.T) {
 	salt := "2short"
-	os.Setenv("GANGWAY_AUTHORIZE_URL", "https://foo.bar/authorize")
+	os.Setenv("GANGWAY_PROVIDER_URL", "https://foo.bar")
 	os.Setenv("GANGWAY_APISERVER_URL", "https://k8s-api.foo.baz")
 	os.Setenv("GANGWAY_CLIENT_ID", "foo")
 	os.Setenv("GANGWAY_CLIENT_SECRET", "bar")
 	os.Setenv("GANGWAY_REDIRECT_URL", "https://foo.baz/callback")
 	os.Setenv("GANGWAY_SESSION_SECURITY_KEY", "testing")
-	os.Setenv("GANGWAY_TOKEN_URL", "https://foo.bar/token")
 	os.Setenv("GANGWAY_SESSION_SALT", salt)
 	_, err := NewConfig("")
 	if err == nil {

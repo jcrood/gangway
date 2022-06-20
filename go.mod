@@ -3,7 +3,7 @@ module github.com/jcrood/gangway
 go 1.18
 
 require (
-	github.com/golang-jwt/jwt/v4 v4.4.1
+	github.com/coreos/go-oidc/v3 v3.2.0
 	github.com/gorilla/securecookie v1.1.1
 	github.com/gorilla/sessions v1.2.1
 	github.com/kelseyhightower/envconfig v1.4.0
@@ -25,6 +25,7 @@ require (
 	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
+	gopkg.in/square/go-jose.v2 v2.5.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	k8s.io/apimachinery v0.24.1 // indirect
 	k8s.io/klog/v2 v2.60.1 // indirect

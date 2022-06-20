@@ -31,8 +31,7 @@ type Config struct {
 	Port int    `yaml:"port"`
 
 	ClusterName            string   `yaml:"clusterName" envconfig:"cluster_name"`
-	AuthorizeURL           string   `yaml:"authorizeURL" envconfig:"authorize_url"`
-	TokenURL               string   `yaml:"tokenURL" envconfig:"token_url"`
+	ProviderURL            string   `yaml:"providerURL" envconfig:"provider_url"`
 	ClientID               string   `yaml:"clientID" envconfig:"client_id"`
 	ClientSecret           string   `yaml:"clientSecret" envconfig:"client_secret"`
 	AllowEmptyClientSecret bool     `yaml:"allowEmptyClientSecret" envconfig:"allow_empty_client_secret"`
@@ -46,13 +45,15 @@ type Config struct {
 	KeyFile                string   `yaml:"keyFile" envconfig:"key_file"`
 	APIServerURL           string   `yaml:"apiServerURL" envconfig:"apiserver_url"`
 	ClusterCAPath          string   `yaml:"clusterCAPath" envconfig:"cluster_ca_path"`
-	TrustedCAPath          string   `yaml:"trustedCAPath" envconfig:"trusted_ca_path"`
-	HTTPPath               string   `yaml:"httpPath" envconfig:"http_path"`
-	ShowClaims             bool     `yaml:"showClaims" envconfig:"show_claims"`
-	SessionSecurityKey     string   `yaml:"sessionSecurityKey" envconfig:"SESSION_SECURITY_KEY"`
-	SessionSalt            string   `yaml:"sessionSalt" envconfig:"SESSION_SALT"`
-	CustomHTMLTemplatesDir string   `yaml:"customHTMLTemplatesDir" envconfig:"custom_html_templates_dir"`
-	CustomAssetsDir        string   `yaml:"customAssetsDir" envconfig:"custom_assets_dir"`
+	ClusterCA              []byte
+	TrustedCAPath          string `yaml:"trustedCAPath" envconfig:"trusted_ca_path"`
+	TrustedCA              []byte
+	HTTPPath               string `yaml:"httpPath" envconfig:"http_path"`
+	ShowClaims             bool   `yaml:"showClaims" envconfig:"show_claims"`
+	SessionSecurityKey     string `yaml:"sessionSecurityKey" envconfig:"session_security_key"`
+	SessionSalt            string `yaml:"sessionSalt" envconfig:"session_salt"`
+	CustomHTMLTemplatesDir string `yaml:"customHTMLTemplatesDir" envconfig:"custom_html_templates_dir"`
+	CustomAssetsDir        string `yaml:"customAssetsDir" envconfig:"custom_assets_dir"`
 }
 
 // NewConfig returns a Config struct from serialized config file
@@ -96,6 +97,11 @@ func NewConfig(configFile string) (*Config, error) {
 		return nil, err
 	}
 
+	err = cfg.loadCerts()
+	if err != nil {
+		return nil, err
+	}
+
 	// Check for trailing slash on HTTPPath and remove
 	cfg.HTTPPath = strings.TrimRight(cfg.HTTPPath, "/")
 
@@ -108,8 +114,7 @@ func (cfg *Config) Validate() error {
 		bad    bool
 		errMsg string
 	}{
-		{cfg.AuthorizeURL == "", "no authorizeURL specified"},
-		{cfg.TokenURL == "", "no tokenURL specified"},
+		{cfg.ProviderURL == "", "no providerURL specified"},
 		{cfg.ClientID == "", "no clientID specified"},
 		{cfg.ClientSecret == "" && !cfg.AllowEmptyClientSecret, "no clientSecret specified"},
 		{cfg.RedirectURL == "", "no redirectURL specified"},
@@ -133,4 +138,24 @@ func (cfg *Config) GetRootPathPrefix() string {
 	}
 
 	return strings.TrimRight(cfg.HTTPPath, "/")
+}
+
+func (cfg *Config) loadCerts() error {
+	if cfg.ClusterCAPath != "" {
+		clusterCA, err := ioutil.ReadFile(cfg.ClusterCAPath)
+		if err != nil {
+			return err
+		}
+		cfg.ClusterCA = clusterCA
+	}
+
+	if cfg.TrustedCAPath != "" {
+		trustedCA, err := ioutil.ReadFile(cfg.TrustedCAPath)
+		if err != nil {
+			return err
+		}
+		cfg.TrustedCA = trustedCA
+	}
+
+	return nil
 }

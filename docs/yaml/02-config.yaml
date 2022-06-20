@@ -30,13 +30,9 @@ data:
     # Env var: GANGWAY_CLUSTER_NAME
     clusterName: "${GANGWAY_CLUSTER_NAME}"
 
-    # OAuth2 URL to start authorization flow.
-    # Env var: GANGWAY_AUTHORIZE_URL
-    authorizeURL: "https://${DNS_NAME}/authorize"
-
-    # OAuth2 URL to obtain access tokens.
-    # Env var: GANGWAY_TOKEN_URL
-    tokenURL: "https://${DNS_NAME}/oauth/token"
+    # OAuth2 Provider URL.
+    # Env var: GANGWAY_PROVIDER_URL
+    ProviderURL: "https://${DNS_NAME}"
 
     # Endpoint that provides user profile information [optional]. Not all providers
     # will require this.
