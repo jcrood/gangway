@@ -1,4 +1,4 @@
-FROM golang:1.18.3-alpine3.16 AS buildstage
+FROM golang:1.21.3-alpine3.18 AS buildstage
 
 WORKDIR /go/src/github.com/jcrood/gangway
 

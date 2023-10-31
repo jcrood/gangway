@@ -8,7 +8,7 @@ on:
       - v*.*.*
   pull_request:
 env:
-  GOLANG_VERSION: '1.18.3'
+  GOLANG_VERSION: '1.21.3'
 
 permissions:
   contents: read
