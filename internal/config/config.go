@@ -16,7 +16,7 @@ package config
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/kelseyhightower/envconfig"
@@ -76,7 +76,7 @@ func NewConfig(configFile string) (*Config, error) {
 	}
 
 	if configFile != "" {
-		data, err := ioutil.ReadFile(configFile)
+		data, err := os.ReadFile(configFile)
 		if err != nil {
 			return nil, err
 		}
@@ -142,7 +142,7 @@ func (cfg *Config) GetRootPathPrefix() string {
 
 func (cfg *Config) loadCerts() error {
 	if cfg.ClusterCAPath != "" {
-		clusterCA, err := ioutil.ReadFile(cfg.ClusterCAPath)
+		clusterCA, err := os.ReadFile(cfg.ClusterCAPath)
 		if err != nil {
 			return err
 		}
@@ -150,7 +150,7 @@ func (cfg *Config) loadCerts() error {
 	}
 
 	if cfg.TrustedCAPath != "" {
-		trustedCA, err := ioutil.ReadFile(cfg.TrustedCAPath)
+		trustedCA, err := os.ReadFile(cfg.TrustedCAPath)
 		if err != nil {
 			return err
 		}

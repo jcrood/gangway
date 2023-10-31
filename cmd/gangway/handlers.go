@@ -20,8 +20,8 @@ import (
 	"encoding/base64"
 	"fmt"
 	htmltemplate "html/template"
-	"io/ioutil"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -66,7 +66,7 @@ func serveTemplate(tmplFile string, data interface{}, w http.ResponseWriter) {
 	// Use custom templates if provided
 	if cfg.CustomHTMLTemplatesDir != "" {
 		templatePath = filepath.Join(cfg.CustomHTMLTemplatesDir, tmplFile)
-		templateData, err = ioutil.ReadFile(templatePath)
+		templateData, err = os.ReadFile(templatePath)
 	} else {
 		templateData, err = templates.FS.ReadFile(tmplFile)
 	}
