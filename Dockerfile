@@ -13,9 +13,12 @@ ADD https://raw.githubusercontent.com/PrismJS/prism/v1.28.0/themes/prism-tomorro
 COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 
-COPY . .
+COPY assets/ assets/
+COPY cmd/ cmd/
+COPY internal/ internal/
+COPY templates/ templates/
 
-RUN CGO_ENABLED=0 go install -ldflags="-w -s" -v github.com/jcrood/gangway/...
+RUN cd cmd/gangway && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /go/bin/gangway
 
 
 FROM gcr.io/distroless/static:nonroot

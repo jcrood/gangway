@@ -5,3 +5,4 @@ config.yml
 vendor/
 .idea/
 gangway.kubeconfig
+deploy/
