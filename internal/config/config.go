@@ -45,18 +45,18 @@ type Config struct {
 }
 
 type MultiClusterConfig struct {
-	Host                   string   `yaml:"host"`
-	Port                   int      `yaml:"port"`
-	Clusters               []Config `yaml:"clusters"`
-	HTTPPath               string   `yaml:"httpPath" envconfig:"http_path"`
-	SessionSecurityKey     string   `yaml:"sessionSecurityKey" envconfig:"session_security_key"`
-	SessionSalt            string   `yaml:"sessionSalt" envconfig:"session_salt"`
-	CustomHTMLTemplatesDir string   `yaml:"customHTMLTemplatesDir" envconfig:"custom_html_templates_dir"`
-	CustomAssetsDir        string   `yaml:"customAssetsDir" envconfig:"custom_assets_dir"`
-	ServeTLS               bool     `yaml:"serveTLS" envconfig:"serve_tls"`
-	CertFile               string   `yaml:"certFile" envconfig:"cert_file"`
-	KeyFile                string   `yaml:"keyFile" envconfig:"key_file"`
-	TrustedCAPath          string   `yaml:"trustedCAPath" envconfig:"trusted_ca_path"`
+	Host                   string              `yaml:"host"`
+	Port                   int                 `yaml:"port"`
+	Clusters               map[string][]Config `yaml:"clusters"`
+	HTTPPath               string              `yaml:"httpPath" envconfig:"http_path"`
+	SessionSecurityKey     string              `yaml:"sessionSecurityKey" envconfig:"session_security_key"`
+	SessionSalt            string              `yaml:"sessionSalt" envconfig:"session_salt"`
+	CustomHTMLTemplatesDir string              `yaml:"customHTMLTemplatesDir" envconfig:"custom_html_templates_dir"`
+	CustomAssetsDir        string              `yaml:"customAssetsDir" envconfig:"custom_assets_dir"`
+	ServeTLS               bool                `yaml:"serveTLS" envconfig:"serve_tls"`
+	CertFile               string              `yaml:"certFile" envconfig:"cert_file"`
+	KeyFile                string              `yaml:"keyFile" envconfig:"key_file"`
+	TrustedCAPath          string              `yaml:"trustedCAPath" envconfig:"trusted_ca_path"`
 	TrustedCA              []byte
 }
 
@@ -70,16 +70,6 @@ func NewMultiClusterConfig(configFile string) (*MultiClusterConfig, error) {
 		SessionSalt: hardCodedDefaultSalt,
 		Host:        "0.0.0.0",
 		Port:        8080,
-		Clusters: []Config{
-			{
-				AllowEmptyClientSecret: false,
-				Scopes:                 []string{"openid", "profile", "email", "offline_access"},
-				UsernameClaim:          "nickname",
-				EmailClaim:             "",
-				ClusterCAPath:          "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt",
-				ShowClaims:             false,
-			},
-		},
 	}
 
 	if configFile != "" {
@@ -99,29 +89,27 @@ func NewMultiClusterConfig(configFile string) (*MultiClusterConfig, error) {
 		return nil, fmt.Errorf("error processing environment variables for prefix %s: %v", "GANGWAY_", err)
 	}
 
-	for i := range cfg.Clusters {
-		cluster := &cfg.Clusters[i]
-		if cluster.EnvPrefix == "" {
-			// Utilisations d'un préfixe par défaut basé sur l'index du cluster.
-			cluster.EnvPrefix = fmt.Sprintf("CLUSTER%d_", i)
-		}
-		err := envconfig.Process(cluster.EnvPrefix+"GANGWAY", cluster)
-		if err != nil {
-			return nil, fmt.Errorf("error processing environment variables for prefix %s: %v", cluster.EnvPrefix+"GANGWAY_", err)
-		}
+	for env, clusterList := range cfg.Clusters {
+		for i := range clusterList {
+			cluster := &clusterList[i]
+			if cluster.EnvPrefix == "" {
+				cluster.EnvPrefix = fmt.Sprintf("%s_CLUSTER%d_", env, i)
+			}
+			err := envconfig.Process(cluster.EnvPrefix+"GANGWAY", cluster)
+			if err != nil {
+				return nil, fmt.Errorf("error processing environment variables for prefix %s: %v", cluster.EnvPrefix+"GANGWAY_", err)
+			}
 
-		err = cluster.Validate()
-		if err != nil {
-			return nil, err
+			err = cluster.Validate()
+			if err != nil {
+				return nil, err
+			}
+
+			err = loadCerts(cluster, cfg)
+			if err != nil {
+				return nil, err
+			}
 		}
-
-		err = loadCerts(cluster, cfg)
-		if err != nil {
-			return nil, err
-		}
-
-		cfg.Clusters[i] = *cluster
-
 	}
 
 	// Check for trailing slash on HTTPPath and remove
@@ -144,6 +132,7 @@ func (cfg *Config) Validate() error {
 
 	for _, check := range checks {
 		if check.bad {
+			fmt.Println(cfg)
 			return fmt.Errorf("invalid config: %s", check.errMsg)
 		}
 	}

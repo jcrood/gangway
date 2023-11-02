@@ -53,7 +53,7 @@ type userInfo struct {
 }
 
 type clusterHomeInfo struct {
-	Clusters []config.Config
+	Clusters map[string][]config.Config
 	HTTPPath string
 }
 
@@ -160,6 +160,7 @@ func loginRequired(next http.Handler) http.Handler {
 }
 
 func clustersHome(w http.ResponseWriter, _ *http.Request) {
+
 	data := &clusterHomeInfo{
 		Clusters: clusterCfg.Clusters,
 		HTTPPath: clusterCfg.HTTPPath,
@@ -242,7 +243,10 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	audience := oauth2.SetAuthURLParam("audience", clusterConfig.Audience)
-	url := oauth2Cfg.AuthCodeURL(state, audience)
+	offlineAccessType := oauth2.SetAuthURLParam("access_type", "offline")
+	forceConsentPrompt := oauth2.SetAuthURLParam("prompt", "consent")
+	url := oauth2Cfg.AuthCodeURL(state, audience, offlineAccessType, forceConsentPrompt)
+	fmt.Println(url)
 
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
@@ -298,6 +302,8 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	fmt.Printf("Voici le contenu du oauth2Token : %v", oauth2Token)
 
 	rawIDToken, ok := oauth2Token.Extra("id_token").(string)
 	if !ok {
@@ -475,9 +481,11 @@ func generateInfo(w http.ResponseWriter, r *http.Request) *userInfo {
 }
 
 func getClusterConfig(clusterName string) (config.Config, bool) {
-	for _, cluster := range clusterCfg.Clusters {
-		if cluster.ClusterName == clusterName {
-			return cluster, true
+	for _, clusters := range clusterCfg.Clusters {
+		for _, cluster := range clusters {
+			if cluster.ClusterName == clusterName {
+				return cluster, true
+			}
 		}
 	}
 	return config.Config{}, false

@@ -7,6 +7,24 @@
     <base href="{{ .HTTPPath }}/">
     <link type="text/css" rel="stylesheet" href="assets/materialize.min.css"  media="screen"/>
     <link type="text/css" rel="stylesheet" href="assets/gangway.css" media="screen"/>
+    <style>
+        /* Ajout de marges supplémentaires entre les cartes */
+        .cluster-card {
+            margin: 10px;
+        }
+        /* Ajuster le padding au besoin pour une meilleure apparence */
+        .card-content {
+            padding: 20px;
+        }
+        /* S'assurer que les cartes prennent toute la largeur pour un seul élément dans une rangée */
+        .cluster-row > .col {
+            flex: 1;
+        }
+        /* Ajouter une marge autour de la rangée pour un espacement externe */
+        .cluster-row {
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
 <nav class="light-blue blue">
@@ -18,14 +36,29 @@
 <div class="container">
     <h1 class="center header">Select a Cluster to Authenticate</h1>
     <p class="flow-text center">Choose a Kubernetes cluster to authenticate using the OpenID Connect (OIDC) flow.</p>
-    <div class="center">
-        <!-- Boucle pour afficher tous les clusters disponibles -->
-        {{ range .Clusters }}
-            <p>
-                <a href="{{ $.HTTPPath }}/login?cluster={{ .ClusterName }}" class="waves-effect waves-light btn blue">{{ .ClusterName }}</a>
-            </p>
-        {{ end }}
-    </div>
+    
+    <!-- Boucle pour afficher tous les clusters disponibles par environnement -->
+    {{ range $env, $clusters := .Clusters }}
+        <div class="cluster-row row"> <!-- Chaque environnement démarre une nouvelle rangée -->
+            <div class="col s12">
+                <div class="card cluster-card"> <!-- Conteneur de la carte avec marge supplémentaire -->
+                    <div class="card-content">
+                        <span class="card-title">{{ $env }}</span>
+                        <div class="row">
+                            <!-- Inner loop for the clusters -->
+                            {{ range $clusters }}
+                                <div class="col"> <!-- Materialize gère la largeur automatiquement -->
+                                    <p class="center">
+                                        <a href="{{ $.HTTPPath }}/login?cluster={{ .ClusterName }}" class="waves-effect waves-light btn blue">{{ .ClusterName }}</a>
+                                    </p>
+                                </div>
+                            {{ end }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {{ end }}
 </div>
 
 <script type="text/javascript" src="assets/materialize.min.js"></script>
