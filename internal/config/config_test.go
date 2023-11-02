@@ -27,7 +27,7 @@ func TestMultiClusterConfigNotFound(t *testing.T) {
 }
 
 func TestEnvironmentOverrides(t *testing.T) {
-	// Let's assume we're testing the first cluster in the multi-cluster config
+	// Set environment variables for the first cluster.
 	os.Setenv("CLUSTER0_GANGLY_PROVIDER_URL", "https://foo.bar/authorize")
 	os.Setenv("CLUSTER0_GANGLY_APISERVER_URL", "https://k8s-api.foo.baz")
 	os.Setenv("CLUSTER0_GANGLY_CLIENT_ID", "foo")
@@ -39,6 +39,9 @@ func TestEnvironmentOverrides(t *testing.T) {
 	os.Setenv("CLUSTER0_GANGLY_SHOW_CLAIMS", "false")
 	os.Setenv("CLUSTER0_GANGLY_SESSION_SALT", "randombanana")
 
+	// ... Code to initialize the cfg.Clusters slice if needed ...
+
+	// Generate the configuration
 	cfg, err := NewMultiClusterConfig("")
 	if err != nil {
 		t.Errorf("Failed to test config overrides with error: %s", err)
@@ -47,6 +50,7 @@ func TestEnvironmentOverrides(t *testing.T) {
 		t.Fatalf("No config present")
 	}
 
+	// Assume that the first cluster is the one we set up with env vars
 	clusterConfig := cfg.Clusters[0]
 	if clusterConfig.Audience != "foo" {
 		t.Errorf("Failed to set audience via environment variable. Expected %s but got %s", "foo", clusterConfig.Audience)

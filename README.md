@@ -11,6 +11,7 @@ _(noun): An opening in the bulwark of the ship to allow passengers to board or l
 
 An application that can be used to easily enable authentication flows via OIDC for a kubernetes cluster.
 Kubernetes supports [OpenID Connect Tokens](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens) as a way to identify users who access the cluster.
+Gangly has been improved and is now able to handle multiple clusters
 Gangly allows users to self-configure their `kubectl` configuration in a few short steps.
 
 ![gangly screenshot](docs/images/screenshot.png)
