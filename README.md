@@ -14,7 +14,11 @@ Kubernetes supports [OpenID Connect Tokens](https://kubernetes.io/docs/reference
 Gangly has been improved and is now able to handle multiple clusters
 Gangly allows users to self-configure their `kubectl` configuration in a few short steps.
 
-![gangly screenshot](docs/images/screenshot.png)
+![gangly multicluster](docs/images/gangly-multicluster.png)
+
+Once authenticated for one of your cluster : 
+
+![gangly](docs/images/screenshot.png)
 
 ## Deployment
 
@@ -67,7 +71,7 @@ kube-apiserver
 
 Requirements for building
 
-- Go (built with version >= 1.17)
+- Go (built with version >= 1.21)
 
 A Makefile is provided for building tasks. The options are as follows
 
