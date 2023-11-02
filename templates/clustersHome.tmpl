@@ -27,9 +27,12 @@
     </style>
 </head>
 <body>
-<nav class="light-blue blue">
+<nav class="custom-nav">
     <div class="nav-wrapper container">
-        <a href="#" class="brand-logo">gangway</a>
+        <a href="#" class="brand-logo">
+            <img src="https://numberly.com/assets/numberly-logo.39674eaa.svg" alt="Numberly Logo" style="vertical-align: middle; height: 50px; margin-right: 15px;">
+            gangly
+        </a>
     </div>
 </nav>
 
@@ -47,9 +50,9 @@
                         <div class="row">
                             <!-- Inner loop for the clusters -->
                             {{ range $clusters }}
-                                <div class="col"> <!-- Materialize gère la largeur automatiquement -->
+                                <div class="col">
                                     <p class="center">
-                                        <a href="{{ $.HTTPPath }}/login?cluster={{ .ClusterName }}" class="waves-effect waves-light btn blue">{{ .ClusterName }}</a>
+                                        <a href="{{ $.HTTPPath }}/login?cluster={{ .ClusterName }}" class="waves-effect waves-light btn btn-cluster">{{ .ClusterName }}</a>
                                     </p>
                                 </div>
                             {{ end }}
