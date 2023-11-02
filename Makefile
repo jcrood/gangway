@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-PROJECT := gangway
+PROJECT := gangly
 # Where to push the docker image.
-REGISTRY ?= jcrood
+REGISTRY ?= soulkyu
 IMAGE := $(REGISTRY)/$(PROJECT)
-SRCDIRS := ./cmd/gangway
+SRCDIRS := ./cmd/gangly
 
 VERSION ?= master
 
@@ -26,7 +26,7 @@ build: deps
 	go build ./...
 
 install:
-	go install -v ./cmd/gangway/...
+	go install -v ./cmd/gangly/...
 
 setup:
 	curl -s -o assets/prism-core.min.js https://raw.githubusercontent.com/PrismJS/prism/v1.28.0/components/prism-core.min.js

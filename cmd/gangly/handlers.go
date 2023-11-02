@@ -26,9 +26,9 @@ import (
 	"strings"
 
 	"github.com/coreos/go-oidc/v3/oidc"
-	"github.com/jcrood/gangway/internal/config"
-	"github.com/jcrood/gangway/templates"
 	log "github.com/sirupsen/logrus"
+	"github.com/soulkyu/gangly/internal/config"
+	"github.com/soulkyu/gangly/templates"
 	"golang.org/x/oauth2"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api/v1"
 	"sigs.k8s.io/yaml"
@@ -144,7 +144,7 @@ func generateKubeConfig(cfg *userInfo) clientcmdapi.Config {
 
 func loginRequired(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		session, err := gangwayUserSession.Session.Get(r, "gangway_id_token")
+		session, err := ganglyUserSession.Session.Get(r, "gangly_id_token")
 		if err != nil {
 			http.Redirect(w, r, clusterCfg.GetRootPathPrefix(), http.StatusTemporaryRedirect)
 			return
@@ -221,7 +221,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	state := base64.URLEncoding.EncodeToString(b)
 
-	session, err := gangwayUserSession.Session.Get(r, "gangway")
+	session, err := ganglyUserSession.Session.Get(r, "gangly")
 	if err != nil {
 		log.Errorf("Got an error in login: %s", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -252,9 +252,9 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func logoutHandler(w http.ResponseWriter, r *http.Request) {
-	gangwayUserSession.Cleanup(w, r, "gangway")
-	gangwayUserSession.Cleanup(w, r, "gangway_id_token")
-	gangwayUserSession.Cleanup(w, r, "gangway_refresh_token")
+	ganglyUserSession.Cleanup(w, r, "gangly")
+	ganglyUserSession.Cleanup(w, r, "gangly_id_token")
+	ganglyUserSession.Cleanup(w, r, "gangly_refresh_token")
 	http.Redirect(w, r, clusterCfg.GetRootPathPrefix(), http.StatusTemporaryRedirect)
 }
 
@@ -262,7 +262,7 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := context.WithValue(r.Context(), oauth2.HTTPClient, transportConfig.HTTPClient)
 
 	// load up session cookies
-	session, err := gangwayUserSession.Session.Get(r, "gangway")
+	session, err := ganglyUserSession.Session.Get(r, "gangly")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -274,13 +274,13 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sessionIDToken, err := gangwayUserSession.Session.Get(r, "gangway_id_token")
+	sessionIDToken, err := ganglyUserSession.Session.Get(r, "gangly_id_token")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	sessionRefreshToken, err := gangwayUserSession.Session.Get(r, "gangway_refresh_token")
+	sessionRefreshToken, err := ganglyUserSession.Session.Get(r, "gangly_refresh_token")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -377,12 +377,12 @@ func kubeConfigHandler(w http.ResponseWriter, r *http.Request) {
 
 func generateInfo(w http.ResponseWriter, r *http.Request) *userInfo {
 	// load the session cookies
-	sessionIDToken, err := gangwayUserSession.Session.Get(r, "gangway_id_token")
+	sessionIDToken, err := ganglyUserSession.Session.Get(r, "gangly_id_token")
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return nil
 	}
-	sessionRefreshToken, err := gangwayUserSession.Session.Get(r, "gangway_refresh_token")
+	sessionRefreshToken, err := ganglyUserSession.Session.Get(r, "gangly_refresh_token")
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return nil
@@ -390,9 +390,9 @@ func generateInfo(w http.ResponseWriter, r *http.Request) *userInfo {
 
 	rawIDToken, ok := sessionIDToken.Values["id_token"].(string)
 	if !ok {
-		gangwayUserSession.Cleanup(w, r, "gangway")
-		gangwayUserSession.Cleanup(w, r, "gangway_id_token")
-		gangwayUserSession.Cleanup(w, r, "gangway_refresh_token")
+		ganglyUserSession.Cleanup(w, r, "gangly")
+		ganglyUserSession.Cleanup(w, r, "gangly_id_token")
+		ganglyUserSession.Cleanup(w, r, "gangly_refresh_token")
 
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return nil
@@ -400,9 +400,9 @@ func generateInfo(w http.ResponseWriter, r *http.Request) *userInfo {
 
 	refreshToken, ok := sessionRefreshToken.Values["refresh_token"].(string)
 	if !ok {
-		gangwayUserSession.Cleanup(w, r, "gangway")
-		gangwayUserSession.Cleanup(w, r, "gangway_id_token")
-		gangwayUserSession.Cleanup(w, r, "gangway_refresh_token")
+		ganglyUserSession.Cleanup(w, r, "gangly")
+		ganglyUserSession.Cleanup(w, r, "gangly_id_token")
+		ganglyUserSession.Cleanup(w, r, "gangly_refresh_token")
 
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return nil
@@ -448,7 +448,7 @@ func generateInfo(w http.ResponseWriter, r *http.Request) *userInfo {
 	kubeCfgUser := strings.Join([]string{username, cfg.ClusterName}, "@")
 
 	if cfg.EmailClaim != "" {
-		log.Warn("using the Email Claim config setting is deprecated. Gangway uses `UsernameClaim@ClusterName`. This field will be removed in a future version.")
+		log.Warn("using the Email Claim config setting is deprecated. Gangly uses `UsernameClaim@ClusterName`. This field will be removed in a future version.")
 	}
 
 	issuerURL, ok := claims["iss"].(string)

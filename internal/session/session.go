@@ -22,7 +22,7 @@ import (
 	"golang.org/x/crypto/pbkdf2"
 )
 
-// Session defines a Gangway session
+// Session defines a Gangly session
 type Session struct {
 	Session *CustomCookieStore
 }

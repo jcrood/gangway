@@ -1,5 +1,5 @@
-# Connecting gangway to Google
-It is possible to use Google as an OAuth provider with gangway. To do so follow the instructions below:
+# Connecting gangly to Google
+It is possible to use Google as an OAuth provider with gangly. To do so follow the instructions below:
 
 ## Setting Up Google OAuth
 
@@ -20,9 +20,9 @@ If previously you haven't created any credentials, you should see an empty list
 
 * In the list, you should see the credentials we just created. To the right, there are 3 action icons. Click on the downward "download" arrow.
 
-## Configuring gangway
+## Configuring gangly
 
-You now need to configure gangway.
+You now need to configure gangly.
 Here is a typical config file:
 
 ```yaml
@@ -43,7 +43,7 @@ clientSecret: "FRGegerwgfsFE_fefdsf"
 audience: "923798723208-9pq62pkrnbhumipnqs4v0a1iu7ij01fo.apps.googleusercontent.com"
 
 # Where to redirect back to. This should be a URL
-# Where gangway is reachable. Cannot be a raw IP address. Must be a valid TLD.
+# Where gangly is reachable. Cannot be a raw IP address. Must be a valid TLD.
 redirectUrl: "https://url.kuberneters.cluster.com/callback"
 
 # Used to specify the scope of the requested authorisation in OAuth.

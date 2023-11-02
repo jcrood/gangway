@@ -28,16 +28,16 @@ func TestMultiClusterConfigNotFound(t *testing.T) {
 
 func TestEnvironmentOverrides(t *testing.T) {
 	// Let's assume we're testing the first cluster in the multi-cluster config
-	os.Setenv("CLUSTER0_GANGWAY_PROVIDER_URL", "https://foo.bar/authorize")
-	os.Setenv("CLUSTER0_GANGWAY_APISERVER_URL", "https://k8s-api.foo.baz")
-	os.Setenv("CLUSTER0_GANGWAY_CLIENT_ID", "foo")
-	os.Setenv("CLUSTER0_GANGWAY_CLIENT_SECRET", "bar")
-	os.Setenv("CLUSTER0_GANGWAY_REDIRECT_URL", "https://foo.baz/callback")
-	os.Setenv("CLUSTER0_GANGWAY_SESSION_SECURITY_KEY", "testing")
-	os.Setenv("CLUSTER0_GANGWAY_AUDIENCE", "foo")
-	os.Setenv("CLUSTER0_GANGWAY_SCOPES", "groups,sub")
-	os.Setenv("CLUSTER0_GANGWAY_SHOW_CLAIMS", "false")
-	os.Setenv("CLUSTER0_GANGWAY_SESSION_SALT", "randombanana")
+	os.Setenv("CLUSTER0_GANGLY_PROVIDER_URL", "https://foo.bar/authorize")
+	os.Setenv("CLUSTER0_GANGLY_APISERVER_URL", "https://k8s-api.foo.baz")
+	os.Setenv("CLUSTER0_GANGLY_CLIENT_ID", "foo")
+	os.Setenv("CLUSTER0_GANGLY_CLIENT_SECRET", "bar")
+	os.Setenv("CLUSTER0_GANGLY_REDIRECT_URL", "https://foo.baz/callback")
+	os.Setenv("CLUSTER0_GANGLY_SESSION_SECURITY_KEY", "testing")
+	os.Setenv("CLUSTER0_GANGLY_AUDIENCE", "foo")
+	os.Setenv("CLUSTER0_GANGLY_SCOPES", "groups,sub")
+	os.Setenv("CLUSTER0_GANGLY_SHOW_CLAIMS", "false")
+	os.Setenv("CLUSTER0_GANGLY_SESSION_SALT", "randombanana")
 
 	cfg, err := NewMultiClusterConfig("")
 	if err != nil {
@@ -65,13 +65,13 @@ func TestEnvironmentOverrides(t *testing.T) {
 }
 
 func TestSessionSaltLength(t *testing.T) {
-	os.Setenv("CLUSTER0_GANGWAY_PROVIDER_URL", "https://foo.bar")
-	os.Setenv("CLUSTER0_GANGWAY_APISERVER_URL", "https://k8s-api.foo.baz")
-	os.Setenv("CLUSTER0_GANGWAY_CLIENT_ID", "foo")
-	os.Setenv("CLUSTER0_GANGWAY_CLIENT_SECRET", "bar")
-	os.Setenv("CLUSTER0_GANGWAY_REDIRECT_URL", "https://foo.baz/callback")
-	os.Setenv("CLUSTER0_GANGWAY_SESSION_SECURITY_KEY", "testing")
-	os.Setenv("CLUSTER0_GANGWAY_SESSION_SALT", "2short")
+	os.Setenv("CLUSTER0_GANGLY_PROVIDER_URL", "https://foo.bar")
+	os.Setenv("CLUSTER0_GANGLY_APISERVER_URL", "https://k8s-api.foo.baz")
+	os.Setenv("CLUSTER0_GANGLY_CLIENT_ID", "foo")
+	os.Setenv("CLUSTER0_GANGLY_CLIENT_SECRET", "bar")
+	os.Setenv("CLUSTER0_GANGLY_REDIRECT_URL", "https://foo.baz/callback")
+	os.Setenv("CLUSTER0_GANGLY_SESSION_SECURITY_KEY", "testing")
+	os.Setenv("CLUSTER0_GANGLY_SESSION_SALT", "2short")
 
 	_, err := NewMultiClusterConfig("")
 	if err == nil {
@@ -92,8 +92,8 @@ func TestGetRootPathPrefix(t *testing.T) {
 			want: "/",
 		},
 		"specified": {
-			path: "/gangway",
-			want: "/gangway",
+			path: "/gangly",
+			want: "/gangly",
 		},
 		"specified default": {
 			path: "/",

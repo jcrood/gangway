@@ -1,4 +1,4 @@
-# Gangway Community Code of Conduct
+# Gangly Community Code of Conduct
 
 ## Contributor Code of Conduct
 

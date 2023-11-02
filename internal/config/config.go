@@ -25,7 +25,7 @@ import (
 
 const hardCodedDefaultSalt = "MkmfuPNHnZBBivy0L0aW"
 
-// Config the configuration field for gangway
+// Config the configuration field for gangly
 type Config struct {
 	EnvPrefix              string   `yaml:"-"`
 	ClusterName            string   `yaml:"clusterName" envconfig:"cluster_name"`
@@ -65,8 +65,8 @@ func NewMultiClusterConfig(configFile string) (*MultiClusterConfig, error) {
 	cfg := &MultiClusterConfig{
 		HTTPPath:    "",
 		ServeTLS:    false,
-		CertFile:    "/etc/gangway/tls/tls.crt",
-		KeyFile:     "/etc/gangway/tls/tls.key",
+		CertFile:    "/etc/gangly/tls/tls.crt",
+		KeyFile:     "/etc/gangly/tls/tls.key",
 		SessionSalt: hardCodedDefaultSalt,
 		Host:        "0.0.0.0",
 		Port:        8080,
@@ -84,9 +84,9 @@ func NewMultiClusterConfig(configFile string) (*MultiClusterConfig, error) {
 		}
 	}
 
-	err := envconfig.Process("GANGWAY", cfg)
+	err := envconfig.Process("GANGLY", cfg)
 	if err != nil {
-		return nil, fmt.Errorf("error processing environment variables for prefix %s: %v", "GANGWAY_", err)
+		return nil, fmt.Errorf("error processing environment variables for prefix %s: %v", "GANGLY_", err)
 	}
 
 	for env, clusterList := range cfg.Clusters {
@@ -95,9 +95,9 @@ func NewMultiClusterConfig(configFile string) (*MultiClusterConfig, error) {
 			if cluster.EnvPrefix == "" {
 				cluster.EnvPrefix = fmt.Sprintf("%s_CLUSTER%d_", env, i)
 			}
-			err := envconfig.Process(cluster.EnvPrefix+"GANGWAY", cluster)
+			err := envconfig.Process(cluster.EnvPrefix+"GANGLY", cluster)
 			if err != nil {
-				return nil, fmt.Errorf("error processing environment variables for prefix %s: %v", cluster.EnvPrefix+"GANGWAY_", err)
+				return nil, fmt.Errorf("error processing environment variables for prefix %s: %v", cluster.EnvPrefix+"GANGLY_", err)
 			}
 
 			err = cluster.Validate()

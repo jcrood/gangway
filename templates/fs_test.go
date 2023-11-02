@@ -2,9 +2,10 @@ package templates_test
 
 import (
 	"errors"
-	"github.com/jcrood/gangway/templates"
 	"io/fs"
 	"testing"
+
+	"github.com/soulkyu/gangly/templates"
 )
 
 func TestTemplateFS(t *testing.T) {

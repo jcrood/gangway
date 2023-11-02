@@ -1,37 +1,37 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gangway
-  namespace: gangway
+  name: gangly
+  namespace: gangly
   labels:
-    app: gangway
+    app: gangly
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: gangway
+      app: gangly
   strategy:
   template:
     metadata:
       labels:
-        app: gangway
+        app: gangly
         revision: "1"
     spec:
       containers:
-      - name: gangway
-        image: gcr.io/heptio-images/gangway:v3.2.0
+      - name: gangly
+        image: gcr.io/heptio-images/gangly:v3.2.0
         imagePullPolicy: Always
-        command: ["gangway", "-config", "/gangway/gangway.yaml"]
+        command: ["gangly", "-config", "/gangly/gangly.yaml"]
         env:
-        - name: GANGWAY_SESSION_SECURITY_KEY
+        - name: GANGLY_SESSION_SECURITY_KEY
           valueFrom:
             secretKeyRef:
-              name: gangway-key
+              name: gangly-key
               key: sessionkey
-        - name: GANGWAY_SESSION_SALT
+        - name: GANGLY_SESSION_SALT
           valueFrom:
             secretKeyRef:
-              name: gangway-key
+              name: gangly-key
               key: sessionsalt
         ports:
         - name: http
@@ -45,8 +45,8 @@ spec:
             cpu: "200m"
             memory: "512Mi"
         volumeMounts:
-        - name: gangway
-          mountPath: /gangway/
+        - name: gangly
+          mountPath: /gangly/
         livenessProbe:
           httpGet:
             path: /
@@ -67,6 +67,6 @@ spec:
         runAsUser: 65534
         runAsGroup: 65534
       volumes:
-      - name: gangway
+      - name: gangly
         configMap:
-          name: gangway
+          name: gangly

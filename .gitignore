@@ -1,8 +1,8 @@
 *.swp
 *.swo
 config.yml
-/gangway
+/gangly
 vendor/
 .idea/
-gangway.kubeconfig
+gangly.kubeconfig
 deploy/

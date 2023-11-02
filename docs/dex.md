@@ -1,7 +1,7 @@
-# Connecting Gangway to Dex
+# Connecting Gangly to Dex
 
 [Dex](https://github.com/coreos/dex) is a handy tool created by CoreOS that provides a common OIDC endpoint for multiple identity providers.
-To configure Gangway to communicate with Dex some information will need to be collected from Dex.
+To configure Gangly to communicate with Dex some information will need to be collected from Dex.
 Following OIDC standard, Dex provides a URL where its OIDC configuration can be gathered.
 This URL is located at `.well-known/openid-configuration`.
 If Dex is configured with an Issuer URL of `http://app.example.com` its OpenID config can be found at `http://app.example.com/.well-known/openid-configuration`.
@@ -46,7 +46,7 @@ An example of the OpenID Configuration provided by Dex:
  }
  ```
 
- Using the Gangway example, just provide your Dex installation as provider. The Dex configuration provides a list 
+ Using the Gangly example, just provide your Dex installation as provider. The Dex configuration provides a list 
  named `claims_supported` which can be chosen from when defining both `username_claim` and `email_claim`.
  The correct claim to use depends on the upstream identity provider that dex is configured for. 
  `client_id` and `client_secret` are strings that can be any value, but they must match the Client ID and Secret in your Dex configuration.

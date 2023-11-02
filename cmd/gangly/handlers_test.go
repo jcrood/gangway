@@ -19,13 +19,13 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/jcrood/gangway/internal/config"
-	"github.com/jcrood/gangway/internal/session"
+	"github.com/soulkyu/gangly/internal/config"
+	"github.com/soulkyu/gangly/internal/session"
 	"golang.org/x/oauth2"
 )
 
 func testInit() {
-	gangwayUserSession = session.New("test", "0123456789")
+	ganglyUserSession = session.New("test", "0123456789")
 	transportConfig = config.NewTransportConfig([]byte(""))
 
 	oauth2Cfg = &oauth2.Config{
@@ -86,7 +86,7 @@ func TestCallbackHandler(t *testing.T) {
 			}
 
 			// Create request
-			if session, err = gangwayUserSession.Session.Get(req, "gangway"); err != nil {
+			if session, err = ganglyUserSession.Session.Get(req, "gangly"); err != nil {
 				t.Fatalf("Error getting session: %v", err)
 			}
 
@@ -133,7 +133,7 @@ func TestCommandLineHandler(t *testing.T) {
 				"code":          "0cj0VQzNl36e4P2L&state=jdep4ov52FeUuzWLDDtSXaF4b5%2F%2FCUJ52xlE69ehnQ8%3D",
 			},
 			expectedStatusCode:         http.StatusOK,
-			expectedUsernameInTemplate: "gangway@heptio.com",
+			expectedUsernameInTemplate: "gangly@heptio.com",
 			emailClaim:                 "Email",
 			usernameClaim:              "sub",
 		},
@@ -156,7 +156,7 @@ func TestCommandLineHandler(t *testing.T) {
 				"code":          "0cj0VQzNl36e4P2L&state=jdep4ov52FeUuzWLDDtSXaF4b5%2F%2FCUJ52xlE69ehnQ8%3D",
 			},
 			expectedStatusCode:         http.StatusOK,
-			expectedUsernameInTemplate: "gangway@heptio.com@cluster1",
+			expectedUsernameInTemplate: "gangly@heptio.com@cluster1",
 			usernameClaim:              "sub",
 		},
 	}
@@ -187,13 +187,13 @@ func TestCommandLineHandler(t *testing.T) {
 			}
 
 			// Create request
-			if session, err = gangwayUserSession.Session.Get(req, "gangway"); err != nil {
+			if session, err = ganglyUserSession.Session.Get(req, "gangly"); err != nil {
 				t.Fatalf("Error getting session: %v", err)
 			}
-			if sessionIDToken, err = gangwayUserSession.Session.Get(req, "gangway_id_token"); err != nil {
+			if sessionIDToken, err = ganglyUserSession.Session.Get(req, "gangly_id_token"); err != nil {
 				t.Fatalf("Error getting session: %v", err)
 			}
-			if sessionRefreshToken, err = gangwayUserSession.Session.Get(req, "gangway_refresh_token"); err != nil {
+			if sessionRefreshToken, err = ganglyUserSession.Session.Get(req, "gangly_refresh_token"); err != nil {
 				t.Fatalf("Error getting session: %v", err)
 			}
 
@@ -264,13 +264,13 @@ func TestKubeconfigHandler(t *testing.T) {
 			},
 			expectedStatusCode:   http.StatusOK,
 			usernameClaim:        "sub",
-			expectedAuthInfoName: "gangway@heptio.com@cluster1",
+			expectedAuthInfoName: "gangly@heptio.com@cluster1",
 			expectedAuthInfoAuthProviderConfig: map[string]string{
 				"client-id":                      "someClientID",
 				"client-secret":                  "someClientSecret",
 				"id-token":                       "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJHYW5nd2F5VGVzdCIsImlhdCI6MTU0MDA0NjM0NywiZXhwIjoxODg3MjAxNTQ3LCJhdWQiOiJnYW5nd2F5LmhlcHRpby5jb20iLCJzdWIiOiJnYW5nd2F5QGhlcHRpby5jb20iLCJHaXZlbk5hbWUiOiJHYW5nIiwiU3VybmFtZSI6IldheSIsIkVtYWlsIjoiZ2FuZ3dheUBoZXB0aW8uY29tIiwiR3JvdXBzIjoiZGV2LGFkbWluIn0.a5ug38N-hzHYsrFMx3puWfCSD_44lFUUugTsr8J9vH0",
 				"refresh-token":                  "bar",
-				"idp-issuer-url":                 "GangwayTest",
+				"idp-issuer-url":                 "GanglyTest",
 				"idp-certificate-authority-data": "",
 			},
 		},
@@ -287,7 +287,7 @@ func TestKubeconfigHandler(t *testing.T) {
 
 			// Create dummy cluster CA file
 			clusterCAData := "dummy cluster CA"
-			f, err := ioutil.TempFile("", "gangway-kubeconfig-handler-test")
+			f, err := ioutil.TempFile("", "gangly-kubeconfig-handler-test")
 			if err != nil {
 				t.Fatalf("Error creating temp file: %v", err)
 			}
@@ -306,13 +306,13 @@ func TestKubeconfigHandler(t *testing.T) {
 			}
 
 			// Create request
-			if session, err = gangwayUserSession.Session.Get(req, "gangway"); err != nil {
+			if session, err = ganglyUserSession.Session.Get(req, "gangly"); err != nil {
 				t.Fatalf("Error getting session: %v", err)
 			}
-			if sessionIDToken, err = gangwayUserSession.Session.Get(req, "gangway_id_token"); err != nil {
+			if sessionIDToken, err = ganglyUserSession.Session.Get(req, "gangly_id_token"); err != nil {
 				t.Fatalf("Error getting session: %v", err)
 			}
-			if sessionRefreshToken, err = gangwayUserSession.Session.Get(req, "gangway_refresh_token"); err != nil {
+			if sessionRefreshToken, err = ganglyUserSession.Session.Get(req, "gangly_refresh_token"); err != nil {
 				t.Fatalf("Error getting session: %v", err)
 			}
 

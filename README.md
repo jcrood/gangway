@@ -2,24 +2,22 @@
 
 ... which was EOL-ed by VMware. See https://github.com/vmware-archive/gangway for the original.
 
-This fork aims to continue development of Gangway for the two people still using it ;) It 
-has several of the PRs on the original merged, fixes a couple of the open issues and adds a
-few other new bits. See the [changelog](CHANGELOG.md) for details.
+This fork aims to continue development of Gangway by Numberly corporation.
 
-gangway
+gangly
 =======
 
 _(noun): An opening in the bulwark of the ship to allow passengers to board or leave the ship._
 
 An application that can be used to easily enable authentication flows via OIDC for a kubernetes cluster.
 Kubernetes supports [OpenID Connect Tokens](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens) as a way to identify users who access the cluster.
-Gangway allows users to self-configure their `kubectl` configuration in a few short steps.
+Gangly allows users to self-configure their `kubectl` configuration in a few short steps.
 
-![gangway screenshot](docs/images/screenshot.png)
+![gangly screenshot](docs/images/screenshot.png)
 
 ## Deployment
 
-Instructions for deploying gangway for common cloud providers can be found [here](docs/README.md).
+Instructions for deploying gangly for common cloud providers can be found [here](docs/README.md).
 
 ## How It Works
 
@@ -32,26 +30,26 @@ token to ensure it is valid and has not expired. Once verified, the API server e
 group membership information from the token, and continues processing the request.
 
 In order to obtain the ID token, the user must go through the OIDC authentication process. This is
-where Gangway comes in. Gangway is a web application that enables the OIDC authentication flow which
+where Gangly comes in. Gangly is a web application that enables the OIDC authentication flow which
 results in the minting of the ID Token.
 
-Gangway is configured as a client of an upstream Identity Service that speaks OIDC. To obtain the ID
-token, the user accesses Gangway, initiates the OIDC flow by clicking the "Log In" button, and
+Gangly is configured as a client of an upstream Identity Service that speaks OIDC. To obtain the ID
+token, the user accesses Gangly, initiates the OIDC flow by clicking the "Log In" button, and
 completes the flow by authenticating with the upstream Identity Service. The user's credentials are
-never shared with Gangway.
+never shared with Gangly.
 
-Once the authentication flow is complete, the user is redirected to a Gangway page that provides
+Once the authentication flow is complete, the user is redirected to a Gangly page that provides
 instructions on how to configure `kubectl` to use the ID token.
 
 The following sequence diagram details the authentication flow:
 
 <p align="center">
-    <img src="docs/images/gangway-sequence-diagram.png" width="600px" />
+    <img src="docs/images/gangly-sequence-diagram.png" width="600px" />
 </p>
 
 ## API-Server flags
 
-gangway requires that the Kubernetes API server is configured for OIDC:
+gangly requires that the Kubernetes API server is configured for OIDC:
 
 https://kubernetes.io/docs/admin/authentication/#configuring-the-api-server
 
@@ -75,8 +73,8 @@ A Makefile is provided for building tasks. The options are as follows
 Getting started is as simple as:
 
 ```bash
-go get -u github.com/jcrood/gangway
-cd $GOPATH/src/github.com/jcrood/gangway
+go get -u github.com/soulkyu/gangly
+cd $GOPATH/src/github.com/soulkyu/gangly
 make setup
 make
 ```

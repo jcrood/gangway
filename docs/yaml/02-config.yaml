@@ -1,60 +1,60 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: gangway
-  namespace: gangway
+  name: gangly
+  namespace: gangly
 data:
-  gangway.yaml: |
+  gangly.yaml: |
     # The address to listen on. Defaults to 0.0.0.0 to listen on all interfaces.
-    # Env var: GANGWAY_HOST
+    # Env var: GANGLY_HOST
     # host: 0.0.0.0
 
     # The port to listen on. Defaults to 8080.
-    # Env var: GANGWAY_PORT
+    # Env var: GANGLY_PORT
     # port: 8080
 
-    # Should Gangway serve TLS vs. plain HTTP? Default: false
-    # Env var: GANGWAY_SERVE_TLS
+    # Should Gangly serve TLS vs. plain HTTP? Default: false
+    # Env var: GANGLY_SERVE_TLS
     # serveTLS: false
 
     # The public cert file (including root and intermediates) to use when serving
     # TLS.
-    # Env var: GANGWAY_CERT_FILE
-    # certFile: /etc/gangway/tls/tls.crt
+    # Env var: GANGLY_CERT_FILE
+    # certFile: /etc/gangly/tls/tls.crt
 
     # The private key file when serving TLS.
-    # Env var: GANGWAY_KEY_FILE
-    # keyFile: /etc/gangway/tls/tls.key
+    # Env var: GANGLY_KEY_FILE
+    # keyFile: /etc/gangly/tls/tls.key
 
     # The cluster name. Used in UI and kubectl config instructions.
-    # Env var: GANGWAY_CLUSTER_NAME
-    clusterName: "${GANGWAY_CLUSTER_NAME}"
+    # Env var: GANGLY_CLUSTER_NAME
+    clusterName: "${GANGLY_CLUSTER_NAME}"
 
     # OAuth2 Provider URL.
-    # Env var: GANGWAY_PROVIDER_URL
+    # Env var: GANGLY_PROVIDER_URL
     ProviderURL: "https://${DNS_NAME}"
 
     # Endpoint that provides user profile information [optional]. Not all providers
     # will require this.
-    # Env var: GANGWAY_AUDIENCE
+    # Env var: GANGLY_AUDIENCE
     audience: "https://${DNS_NAME}/userinfo"
 
     # Used to specify the scope of the requested Oauth authorization.
     # scopes: ["openid", "profile", "email", "offline_access"]
 
-    # Where to redirect back to. This should be a URL where gangway is reachable.
+    # Where to redirect back to. This should be a URL where gangly is reachable.
     # Typically this also needs to be registered as part of the oauth application
     # with the oAuth provider.
-    # Env var: GANGWAY_REDIRECT_URL
-    redirectURL: "https://${GANGWAY_REDIRECT_URL}/callback"
+    # Env var: GANGLY_REDIRECT_URL
+    redirectURL: "https://${GANGLY_REDIRECT_URL}/callback"
 
     # API client ID as indicated by the identity provider
-    # Env var: GANGWAY_CLIENT_ID
-    clientID: "${GANGWAY_CLIENT_ID}"
+    # Env var: GANGLY_CLIENT_ID
+    clientID: "${GANGLY_CLIENT_ID}"
 
     # API client secret as indicated by the identity provider
-    # Env var: GANGWAY_CLIENT_SECRET
-    clientSecret: "${GANGWAY_CLIENT_SECRET}"
+    # Env var: GANGLY_CLIENT_SECRET
+    clientSecret: "${GANGLY_CLIENT_SECRET}"
 
     # Some identity providers accept an empty client secret, this
     # is not generally considered a good idea. If you have to use an
@@ -65,35 +65,35 @@ data:
     # The JWT claim to use as the username. This is used in UI.
     # Default is "nickname". This is combined with the clusterName
     # for the "user" portion of the kubeconfig.
-    # Env var: GANGWAY_USERNAME_CLAIM
+    # Env var: GANGLY_USERNAME_CLAIM
     usernameClaim: "sub"
 
     # The API server endpoint used to configure kubectl
-    # Env var: GANGWAY_APISERVER_URL
-    apiServerURL: "https://${GANGWAY_APISERVER_URL}"
+    # Env var: GANGLY_APISERVER_URL
+    apiServerURL: "https://${GANGLY_APISERVER_URL}"
 
     # The path to find the CA bundle for the API server. Used to configure kubectl.
     # This is typically mounted into the default location for workloads running on
     # a Kubernetes cluster and doesn't need to be set.
-    # Env var: GANGWAY_CLUSTER_CA_PATH
+    # Env var: GANGLY_CLUSTER_CA_PATH
     # clusterCAPath: "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
 
     # The path to a root CA to trust for self signed certificates at the Oauth2 URLs
-    # Env var: GANGWAY_TRUSTED_CA_PATH
+    # Env var: GANGLY_TRUSTED_CA_PATH
     #trustedCAPath: /cacerts/rootca.crt
 
-    # The path gangway uses to create urls (defaults to "")
-    # Env var: GANGWAY_HTTP_PATH
-    #httpPath: "https://${GANGWAY_HTTP_PATH}"
+    # The path gangly uses to create urls (defaults to "")
+    # Env var: GANGLY_HTTP_PATH
+    #httpPath: "https://${GANGLY_HTTP_PATH}"
 
     # The path to find custom HTML templates
-    # Env var: GANGWAY_CUSTOM_HTML_TEMPLATES_DIR
+    # Env var: GANGLY_CUSTOM_HTML_TEMPLATES_DIR
     #customHTMLTemplatesDir: /custom-templates
 
     # The path to find assets used in HTML templates
-    # Env var: GANGWAY_CUSTOM_ASSETS_DIR
+    # Env var: GANGLY_CUSTOM_ASSETS_DIR
     #customHTMLTemplatesDir: /assets
 
     # Show the claims received from the issuer (defaults to: false)
-    # Env var: GANGWAY_SHOW_CLAIMS
+    # Env var: GANGLY_SHOW_CLAIMS
     #showClaims: false

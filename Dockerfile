@@ -1,6 +1,6 @@
 FROM golang:1.21.3-alpine3.18 AS buildstage
 
-WORKDIR /go/src/github.com/jcrood/gangway
+WORKDIR /go/src/github.com/soulkyu/gangly
 
 ADD https://raw.githubusercontent.com/Dogfalo/materialize/v1-dev/dist/css/materialize.min.css assets/
 ADD https://raw.githubusercontent.com/Dogfalo/materialize/v1-dev/dist/js/materialize.min.js assets/
@@ -18,10 +18,10 @@ COPY cmd/ cmd/
 COPY internal/ internal/
 COPY templates/ templates/
 
-RUN cd cmd/gangway && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /go/bin/gangway
+RUN cd cmd/gangly && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /go/bin/gangly
 
 
 FROM gcr.io/distroless/static:nonroot
 
 USER 1001:1001
-COPY --from=buildstage /go/bin/gangway /bin/gangway
+COPY --from=buildstage /go/bin/gangly /bin/gangly

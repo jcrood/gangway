@@ -1,4 +1,4 @@
-# Connecting Gangway to Auth0
+# Connecting Gangly to Auth0
 
 1. Create an account for Auth0 and login
 2. From the dashboard, click "New Application"
@@ -32,7 +32,7 @@
 
 ## Example
 
-A typical gangway config for Auth0:
+A typical gangly config for Auth0:
 
 ```yaml
 clusterName: "YourCluster"
@@ -40,7 +40,7 @@ providerURL: "https://example.auth0.com"
 clientID: "<your client ID>"
 clientSecret: "<your client secret>"
 audience: "https://example.auth0.com/userinfo"
-redirectURL: "https://gangway.example.com/callback"
+redirectURL: "https://gangly.example.com/callback"
 scopes: ["openid", "profile", "email", "offline_access"]
 usernameClaim: "sub"
 emailClaim: "email"

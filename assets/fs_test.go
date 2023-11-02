@@ -2,14 +2,15 @@ package assets_test
 
 import (
 	"errors"
-	"github.com/jcrood/gangway/assets"
 	"io/fs"
 	"testing"
+
+	"github.com/soulkyu/gangly/assets"
 )
 
 func TestAssetFS(t *testing.T) {
-	t.Run("finds gangway assets", func(t *testing.T) {
-		filenames := []string{"gangway.css", "gangway.js"}
+	t.Run("finds gangly assets", func(t *testing.T) {
+		filenames := []string{"gangly.css", "gangly.js"}
 		var missing, empty []string
 
 		for _, filename := range filenames {

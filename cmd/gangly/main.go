@@ -26,10 +26,10 @@ import (
 	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
-	"github.com/jcrood/gangway/assets"
-	"github.com/jcrood/gangway/internal/config"
-	"github.com/jcrood/gangway/internal/session"
 	log "github.com/sirupsen/logrus"
+	"github.com/soulkyu/gangly/assets"
+	"github.com/soulkyu/gangly/internal/config"
+	"github.com/soulkyu/gangly/internal/session"
 	"golang.org/x/oauth2"
 )
 
@@ -37,7 +37,7 @@ var clusterCfg *config.MultiClusterConfig
 var cfg *config.Config
 var oauth2Cfg *oauth2.Config
 
-var gangwayUserSession *session.Session
+var ganglyUserSession *session.Session
 
 var transportConfig *config.TransportConfig
 var provider *oidc.Provider
@@ -75,7 +75,7 @@ func main() {
 	}
 
 	transportConfig = config.NewTransportConfig(clusterCfg.TrustedCA)
-	gangwayUserSession = session.New(clusterCfg.SessionSecurityKey, clusterCfg.SessionSalt)
+	ganglyUserSession = session.New(clusterCfg.SessionSecurityKey, clusterCfg.SessionSalt)
 
 	var assetFs http.FileSystem
 	if clusterCfg.CustomAssetsDir != "" {
@@ -129,7 +129,7 @@ func main() {
 
 	// start up the http server
 	go func() {
-		log.Infof("Gangway started! Listening on: %s", bindAddr)
+		log.Infof("Gangly started! Listening on: %s", bindAddr)
 
 		// exit with FATAL logging why we could not start
 		// example: FATA[0000] listen tcp 0.0.0.0:8080: bind: address already in use

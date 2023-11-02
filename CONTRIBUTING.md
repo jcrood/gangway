@@ -5,7 +5,7 @@ that they are only submitting work that they have rights to, we are requiring
 everyone to acknowledge this by signing their work.
 
 Any copyright notices in this repos should specify the authors as "The
-heptio/gangway authors".
+heptio/gangly authors".
 
 To sign your work, just add a line like this at the end of your commit message:
 
