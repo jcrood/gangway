@@ -19,65 +19,61 @@ import (
 	"testing"
 )
 
-func TestConfigNotFound(t *testing.T) {
-	_, err := NewConfig("nonexistentfile")
+func TestMultiClusterConfigNotFound(t *testing.T) {
+	_, err := NewMultiClusterConfig("nonexistentfile")
 	if err == nil {
-		t.Errorf("Expected config file parsing to file for non-existent config file")
+		t.Errorf("Expected config file parsing to fail for non-existent config file")
 	}
 }
 
-func TestEnvionmentOverrides(t *testing.T) {
-	salt := "randombanana"
-	os.Setenv("GANGWAY_PROVIDER_URL", "https://foo.bar/authorize")
-	os.Setenv("GANGWAY_APISERVER_URL", "https://k8s-api.foo.baz")
-	os.Setenv("GANGWAY_CLIENT_ID", "foo")
-	os.Setenv("GANGWAY_CLIENT_SECRET", "bar")
-	os.Setenv("GANGWAY_PORT", "1234")
-	os.Setenv("GANGWAY_REDIRECT_URL", "https://foo.baz/callback")
-	os.Setenv("GANGWAY_CLUSTER_CA_PATH", "") // FIXME: add test fixture
-	os.Setenv("GANGWAY_SESSION_SECURITY_KEY", "testing")
-	os.Setenv("GANGWAY_AUDIENCE", "foo")
-	os.Setenv("GANGWAY_SCOPES", "groups,sub")
-	os.Setenv("GANGWAY_SHOW_CLAIMS", "false")
-	os.Setenv("GANGWAY_SESSION_SALT", salt)
-	cfg, err := NewConfig("")
+func TestEnvironmentOverrides(t *testing.T) {
+	// Let's assume we're testing the first cluster in the multi-cluster config
+	os.Setenv("CLUSTER0_GANGWAY_PROVIDER_URL", "https://foo.bar/authorize")
+	os.Setenv("CLUSTER0_GANGWAY_APISERVER_URL", "https://k8s-api.foo.baz")
+	os.Setenv("CLUSTER0_GANGWAY_CLIENT_ID", "foo")
+	os.Setenv("CLUSTER0_GANGWAY_CLIENT_SECRET", "bar")
+	os.Setenv("CLUSTER0_GANGWAY_REDIRECT_URL", "https://foo.baz/callback")
+	os.Setenv("CLUSTER0_GANGWAY_SESSION_SECURITY_KEY", "testing")
+	os.Setenv("CLUSTER0_GANGWAY_AUDIENCE", "foo")
+	os.Setenv("CLUSTER0_GANGWAY_SCOPES", "groups,sub")
+	os.Setenv("CLUSTER0_GANGWAY_SHOW_CLAIMS", "false")
+	os.Setenv("CLUSTER0_GANGWAY_SESSION_SALT", "randombanana")
+
+	cfg, err := NewMultiClusterConfig("")
 	if err != nil {
 		t.Errorf("Failed to test config overrides with error: %s", err)
 	}
-	if cfg == nil {
+	if cfg == nil || len(cfg.Clusters) == 0 {
 		t.Fatalf("No config present")
 	}
 
-	if cfg.Port != 1234 {
-		t.Errorf("Failed to override config with environment")
+	clusterConfig := cfg.Clusters[0]
+	if clusterConfig.Audience != "foo" {
+		t.Errorf("Failed to set audience via environment variable. Expected %s but got %s", "foo", clusterConfig.Audience)
 	}
 
-	if cfg.Audience != "foo" {
-		t.Errorf("Failed to set audience via environment variable. Expected %s but got %s", "foo", cfg.Audience)
+	if clusterConfig.Scopes[0] != "groups" || clusterConfig.Scopes[1] != "sub" {
+		t.Errorf("Failed to set scopes via environment variable. Expected %s but got %s", "[groups, sub]", clusterConfig.Scopes)
 	}
 
-	if cfg.Scopes[0] != "groups" || cfg.Scopes[1] != "sub" {
-		t.Errorf("Failed to set scopes via environment variable. Expected %s but got %s", "[groups, sub]", cfg.Scopes)
+	if clusterConfig.ShowClaims != false {
+		t.Errorf("Failed to disable showing of claims. Expected %t but got %t", false, clusterConfig.ShowClaims)
 	}
-
-	if cfg.ShowClaims != false {
-		t.Errorf("Failed to disable showing of claims. Expected %t but got %t", false, cfg.ShowClaims)
-	}
-	if cfg.SessionSalt != salt {
-		t.Errorf("Failed to override session salt. Expected %s but got %s", salt, cfg.SessionSalt)
+	if clusterConfig.SessionSalt != "randombanana" {
+		t.Errorf("Failed to override session salt. Expected %s but got %s", "randombanana", clusterConfig.SessionSalt)
 	}
 }
 
 func TestSessionSaltLength(t *testing.T) {
-	salt := "2short"
-	os.Setenv("GANGWAY_PROVIDER_URL", "https://foo.bar")
-	os.Setenv("GANGWAY_APISERVER_URL", "https://k8s-api.foo.baz")
-	os.Setenv("GANGWAY_CLIENT_ID", "foo")
-	os.Setenv("GANGWAY_CLIENT_SECRET", "bar")
-	os.Setenv("GANGWAY_REDIRECT_URL", "https://foo.baz/callback")
-	os.Setenv("GANGWAY_SESSION_SECURITY_KEY", "testing")
-	os.Setenv("GANGWAY_SESSION_SALT", salt)
-	_, err := NewConfig("")
+	os.Setenv("CLUSTER0_GANGWAY_PROVIDER_URL", "https://foo.bar")
+	os.Setenv("CLUSTER0_GANGWAY_APISERVER_URL", "https://k8s-api.foo.baz")
+	os.Setenv("CLUSTER0_GANGWAY_CLIENT_ID", "foo")
+	os.Setenv("CLUSTER0_GANGWAY_CLIENT_SECRET", "bar")
+	os.Setenv("CLUSTER0_GANGWAY_REDIRECT_URL", "https://foo.baz/callback")
+	os.Setenv("CLUSTER0_GANGWAY_SESSION_SECURITY_KEY", "testing")
+	os.Setenv("CLUSTER0_GANGWAY_SESSION_SALT", "2short")
+
+	_, err := NewMultiClusterConfig("")
 	if err == nil {
 		t.Errorf("Expected error but got none")
 	}
@@ -107,7 +103,7 @@ func TestGetRootPathPrefix(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			cfg := &Config{
+			cfg := &MultiClusterConfig{
 				HTTPPath: tc.path,
 			}
 

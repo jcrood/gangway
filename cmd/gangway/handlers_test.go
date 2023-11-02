@@ -41,10 +41,6 @@ func TestHomeHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	cfg = &config.Config{
-		HTTPPath: "",
-	}
-
 	rr := httptest.NewRecorder()
 	handler := http.HandlerFunc(homeHandler)
 

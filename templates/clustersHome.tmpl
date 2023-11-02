@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Select a Cluster - Login</title>
+    <base href="{{ .HTTPPath }}/">
+    <link type="text/css" rel="stylesheet" href="assets/materialize.min.css"  media="screen"/>
+    <link type="text/css" rel="stylesheet" href="assets/gangway.css" media="screen"/>
+</head>
+<body>
+<nav class="light-blue blue">
+    <div class="nav-wrapper container">
+        <a href="#" class="brand-logo">gangway</a>
+    </div>
+</nav>
+
+<div class="container">
+    <h1 class="center header">Select a Cluster to Authenticate</h1>
+    <p class="flow-text center">Choose a Kubernetes cluster to authenticate using the OpenID Connect (OIDC) flow.</p>
+    <div class="center">
+        <!-- Boucle pour afficher tous les clusters disponibles -->
+        {{ range .Clusters }}
+            <p>
+                <a href="{{ $.HTTPPath }}/login?cluster={{ .ClusterName }}" class="waves-effect waves-light btn blue">{{ .ClusterName }}</a>
+            </p>
+        {{ end }}
+    </div>
+</div>
+
+<script type="text/javascript" src="assets/materialize.min.js"></script>
+</body>
+</html>

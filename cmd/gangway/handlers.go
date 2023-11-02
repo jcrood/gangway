@@ -25,6 +25,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/coreos/go-oidc/v3/oidc"
+	"github.com/jcrood/gangway/internal/config"
 	"github.com/jcrood/gangway/templates"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
@@ -46,8 +48,13 @@ type userInfo struct {
 	APIServerURL string
 	ClusterCA    string
 	TrustedCA    string
-	HTTPPath     string
 	ShowClaims   bool
+	HTTPPath     string
+}
+
+type clusterHomeInfo struct {
+	Clusters []config.Config
+	HTTPPath string
 }
 
 // homeInfo is used to store dynamic properties on
@@ -64,8 +71,8 @@ func serveTemplate(tmplFile string, data interface{}, w http.ResponseWriter) {
 	)
 
 	// Use custom templates if provided
-	if cfg.CustomHTMLTemplatesDir != "" {
-		templatePath = filepath.Join(cfg.CustomHTMLTemplatesDir, tmplFile)
+	if clusterCfg.CustomHTMLTemplatesDir != "" {
+		templatePath = filepath.Join(clusterCfg.CustomHTMLTemplatesDir, tmplFile)
 		templateData, err = os.ReadFile(templatePath)
 	} else {
 		templateData, err = templates.FS.ReadFile(tmplFile)
@@ -139,12 +146,12 @@ func loginRequired(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		session, err := gangwayUserSession.Session.Get(r, "gangway_id_token")
 		if err != nil {
-			http.Redirect(w, r, cfg.GetRootPathPrefix(), http.StatusTemporaryRedirect)
+			http.Redirect(w, r, clusterCfg.GetRootPathPrefix(), http.StatusTemporaryRedirect)
 			return
 		}
 
 		if session.Values["id_token"] == nil {
-			http.Redirect(w, r, cfg.GetRootPathPrefix(), http.StatusTemporaryRedirect)
+			http.Redirect(w, r, clusterCfg.GetRootPathPrefix(), http.StatusTemporaryRedirect)
 			return
 		}
 
@@ -152,10 +159,19 @@ func loginRequired(next http.Handler) http.Handler {
 	})
 }
 
+func clustersHome(w http.ResponseWriter, _ *http.Request) {
+	data := &clusterHomeInfo{
+		Clusters: clusterCfg.Clusters,
+		HTTPPath: clusterCfg.HTTPPath,
+	}
+
+	serveTemplate("clustersHome.tmpl", data, w)
+}
+
 func homeHandler(w http.ResponseWriter, _ *http.Request) {
 	data := &homeInfo{
 		ClusterName: cfg.ClusterName,
-		HTTPPath:    cfg.HTTPPath,
+		HTTPPath:    clusterCfg.HTTPPath,
 	}
 
 	serveTemplate("home.tmpl", data, w)
@@ -163,8 +179,40 @@ func homeHandler(w http.ResponseWriter, _ *http.Request) {
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
 
+	clusterName := r.URL.Query().Get("cluster")
+
+	if clusterName == "" {
+		// Si aucun cluster n'est spécifié, redirigez vers la page de sélection du cluster.
+		http.Redirect(w, r, clusterCfg.GetRootPathPrefix(), http.StatusSeeOther)
+		return
+	}
+
+	clusterConfig, ok := getClusterConfig(clusterName)
+	if !ok {
+		http.Error(w, "Invalid cluster name", http.StatusBadRequest)
+		return
+	}
+
+	ctx := context.Background()
+	provider, err := oidc.NewProvider(ctx, clusterConfig.ProviderURL)
+	if err != nil {
+		log.Errorf("Could not create OIDC provider for cluster %s: %s", clusterName, err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	verifier = provider.Verifier(&oidc.Config{ClientID: clusterConfig.ClientID})
+
+	oauth2Cfg = &oauth2.Config{
+		ClientID:     clusterConfig.ClientID,
+		ClientSecret: clusterConfig.ClientSecret,
+		RedirectURL:  clusterConfig.RedirectURL,
+		Scopes:       clusterConfig.Scopes,
+		Endpoint:     provider.Endpoint(),
+	}
+
 	b := make([]byte, 32)
-	_, err := rand.Read(b)
+	_, err = rand.Read(b)
 	if err != nil {
 		log.Errorf("failed to geenrate rnd data: %s", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -186,7 +234,14 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	audience := oauth2.SetAuthURLParam("audience", cfg.Audience)
+	session.Values["clusterName"] = clusterName
+	err = session.Save(r, w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	audience := oauth2.SetAuthURLParam("audience", clusterConfig.Audience)
 	url := oauth2Cfg.AuthCodeURL(state, audience)
 
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
@@ -196,7 +251,7 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 	gangwayUserSession.Cleanup(w, r, "gangway")
 	gangwayUserSession.Cleanup(w, r, "gangway_id_token")
 	gangwayUserSession.Cleanup(w, r, "gangway_refresh_token")
-	http.Redirect(w, r, cfg.GetRootPathPrefix(), http.StatusTemporaryRedirect)
+	http.Redirect(w, r, clusterCfg.GetRootPathPrefix(), http.StatusTemporaryRedirect)
 }
 
 func callbackHandler(w http.ResponseWriter, r *http.Request) {
@@ -206,6 +261,12 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := gangwayUserSession.Session.Get(r, "gangway")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	clusterName, ok := session.Values["clusterName"].(string)
+	if !ok || clusterName == "" {
+		http.Error(w, "Internal error: clusterName not found", http.StatusInternalServerError)
 		return
 	}
 
@@ -271,7 +332,7 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, fmt.Sprintf("%s/commandline", cfg.HTTPPath), http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("%s/commandline?cluster=%s", clusterCfg.HTTPPath, clusterName), http.StatusSeeOther)
 }
 
 func commandlineHandler(w http.ResponseWriter, r *http.Request) {
@@ -358,6 +419,20 @@ func generateInfo(w http.ResponseWriter, r *http.Request) *userInfo {
 		return nil
 	}
 
+	clusterName := r.URL.Query().Get("cluster")
+
+	if clusterName == "" {
+		// Si aucun cluster n'est spécifié, redirigez vers la page de sélection du cluster.
+		http.Redirect(w, r, clusterCfg.GetRootPathPrefix(), http.StatusSeeOther)
+		return nil
+	}
+
+	cfg, ok := getClusterConfig(clusterName)
+	if !ok {
+		http.Error(w, "Invalid cluster name", http.StatusBadRequest)
+		return nil
+	}
+
 	username, ok := claims[cfg.UsernameClaim].(string)
 	if !ok {
 		http.Error(w, "Could not parse Username claim", http.StatusInternalServerError)
@@ -392,9 +467,18 @@ func generateInfo(w http.ResponseWriter, r *http.Request) *userInfo {
 		IssuerURL:    issuerURL,
 		APIServerURL: cfg.APIServerURL,
 		ClusterCA:    string(cfg.ClusterCA),
-		TrustedCA:    string(cfg.TrustedCA),
-		HTTPPath:     cfg.HTTPPath,
+		TrustedCA:    string(clusterCfg.TrustedCA),
 		ShowClaims:   cfg.ShowClaims,
+		HTTPPath:     clusterCfg.HTTPPath,
 	}
 	return info
+}
+
+func getClusterConfig(clusterName string) (config.Config, bool) {
+	for _, cluster := range clusterCfg.Clusters {
+		if cluster.ClusterName == clusterName {
+			return cluster, true
+		}
+	}
+	return config.Config{}, false
 }

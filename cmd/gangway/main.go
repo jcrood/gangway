@@ -33,6 +33,7 @@ import (
 	"golang.org/x/oauth2"
 )
 
+var clusterCfg *config.MultiClusterConfig
 var cfg *config.Config
 var oauth2Cfg *oauth2.Config
 
@@ -54,7 +55,7 @@ func rootPathHandler(fn http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// The "/" pattern matches everything, so we need to check
 		// that we're at the root here.
-		if cfg.HTTPPath == "" && r.URL.Path != "/" {
+		if clusterCfg.HTTPPath == "" && r.URL.Path != "/" {
 			http.NotFound(w, r)
 			return
 		}
@@ -63,57 +64,40 @@ func rootPathHandler(fn http.HandlerFunc) http.HandlerFunc {
 }
 
 func main() {
-	cfgFile := flag.String("config", "", "The config file to use.")
+	clusterCfgile := flag.String("config", "", "The config file to use.")
 	flag.Parse()
 
 	var err error
-	cfg, err = config.NewConfig(*cfgFile)
+	clusterCfg, err = config.NewMultiClusterConfig(*clusterCfgile)
 	if err != nil {
 		log.Errorf("Could not parse config file: %s", err)
 		os.Exit(1)
 	}
 
-	ctx := context.Background()
-	provider, err = oidc.NewProvider(ctx, cfg.ProviderURL)
-	if err != nil {
-		log.Errorf("Could not create OIDC provider: %s", err)
-		os.Exit(2)
-	}
-
-	verifier = provider.Verifier(&oidc.Config{ClientID: cfg.ClientID})
-
-	oauth2Cfg = &oauth2.Config{
-		ClientID:     cfg.ClientID,
-		ClientSecret: cfg.ClientSecret,
-		RedirectURL:  cfg.RedirectURL,
-		Scopes:       cfg.Scopes,
-		Endpoint:     provider.Endpoint(),
-	}
-
-	transportConfig = config.NewTransportConfig(cfg.TrustedCA)
-	gangwayUserSession = session.New(cfg.SessionSecurityKey, cfg.SessionSalt)
+	transportConfig = config.NewTransportConfig(clusterCfg.TrustedCA)
+	gangwayUserSession = session.New(clusterCfg.SessionSecurityKey, clusterCfg.SessionSalt)
 
 	var assetFs http.FileSystem
-	if cfg.CustomAssetsDir != "" {
-		assetFs = http.Dir("cfg.CustomAssetsDir")
+	if clusterCfg.CustomAssetsDir != "" {
+		assetFs = http.Dir("clusterCfg.CustomAssetsDir")
 	} else {
 		assetFs = http.FS(assets.FS)
 	}
 
-	http.HandleFunc(cfg.GetRootPathPrefix(), httpLogger(rootPathHandler(homeHandler)))
-	http.HandleFunc(fmt.Sprintf("%s/login", cfg.HTTPPath), httpLogger(loginHandler))
-	http.HandleFunc(fmt.Sprintf("%s/callback", cfg.HTTPPath), httpLogger(callbackHandler))
+	http.HandleFunc(clusterCfg.GetRootPathPrefix(), httpLogger(rootPathHandler(clustersHome)))
+	http.HandleFunc(fmt.Sprintf("%s/login", clusterCfg.HTTPPath), httpLogger(loginHandler))
+	http.HandleFunc(fmt.Sprintf("%s/callback", clusterCfg.HTTPPath), httpLogger(callbackHandler))
 
 	// middleware'd routes
-	http.Handle(fmt.Sprintf("%s/logout", cfg.HTTPPath), loginRequired(http.HandlerFunc(logoutHandler)))
-	http.Handle(fmt.Sprintf("%s/commandline", cfg.HTTPPath), loginRequired(http.HandlerFunc(commandlineHandler)))
-	http.Handle(fmt.Sprintf("%s/kubeconf", cfg.HTTPPath), loginRequired(http.HandlerFunc(kubeConfigHandler)))
+	http.Handle(fmt.Sprintf("%s/logout", clusterCfg.HTTPPath), loginRequired(http.HandlerFunc(logoutHandler)))
+	http.Handle(fmt.Sprintf("%s/commandline", clusterCfg.HTTPPath), loginRequired(http.HandlerFunc(commandlineHandler)))
+	http.Handle(fmt.Sprintf("%s/kubeconf", clusterCfg.HTTPPath), loginRequired(http.HandlerFunc(kubeConfigHandler)))
 
 	// assets
-	assetsPath := fmt.Sprintf("%s/assets/", cfg.HTTPPath)
+	assetsPath := fmt.Sprintf("%s/assets/", clusterCfg.HTTPPath)
 	http.Handle(assetsPath, http.StripPrefix(assetsPath, http.FileServer(assetFs)))
 
-	bindAddr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
+	bindAddr := fmt.Sprintf("%s:%d", clusterCfg.Host, clusterCfg.Port)
 	// create http server with timeouts
 	httpServer := &http.Server{
 		Addr:         bindAddr,
@@ -121,7 +105,7 @@ func main() {
 		WriteTimeout: 10 * time.Second,
 	}
 
-	if cfg.ServeTLS {
+	if clusterCfg.ServeTLS {
 		// update http server with TLS config
 		httpServer.TLSConfig = &tls.Config{
 			MinVersion: tls.VersionTLS12, // minimum TLS 1.2
@@ -149,8 +133,8 @@ func main() {
 
 		// exit with FATAL logging why we could not start
 		// example: FATA[0000] listen tcp 0.0.0.0:8080: bind: address already in use
-		if cfg.ServeTLS {
-			log.Fatal(httpServer.ListenAndServeTLS(cfg.CertFile, cfg.KeyFile))
+		if clusterCfg.ServeTLS {
+			log.Fatal(httpServer.ListenAndServeTLS(clusterCfg.CertFile, clusterCfg.KeyFile))
 		} else {
 			log.Fatal(httpServer.ListenAndServe())
 		}
